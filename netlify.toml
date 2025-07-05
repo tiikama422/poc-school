@@ -5,6 +5,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+
 [build.environment]
-  NEXT_PUBLIC_SUPABASE_URL = "YOUR_SUPABASE_URL"
-  NEXT_PUBLIC_SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"
+  NEXT_PUBLIC_SUPABASE_URL = "https://bsssphmllvqlczvvrmwg.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
