@@ -10,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
 
   const handleSignIn = async (e) => {
@@ -106,14 +107,24 @@ export default function Login() {
             <div className="relative">
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-6 py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-white/30 focus:bg-black/30 focus:outline-none focus:ring-0 transition-all duration-300 focus:-translate-y-px"
-                placeholder="Enter your password"
+                className="w-full px-6 py-4 pr-12 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-white/30 focus:bg-black/30 focus:outline-none focus:ring-0 transition-all duration-300 focus:-translate-y-px"
+                placeholder="パスワードを入力"
                 required
               />
-              <span className="absolute right-5 top-1/2 transform -translate-y-1/2 text-slate-500 opacity-70">●●●</span>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                {showPassword ? (
+                  <span className="text-xl">👁️</span>
+                ) : (
+                  <span className="text-xl">🙈</span>
+                )}
+              </button>
             </div>
           </div>
 
