@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js')
+const { safeBase64Decode } = require('./lib/base64')
 
 // Supabaseクライアントの初期化
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -46,7 +47,7 @@ exports.handler = async (event, context) => {
     let sessionUser
     try {
       const token = authHeader.replace('Bearer ', '')
-      sessionUser = JSON.parse(atob(token))
+      sessionUser = JSON.parse(safeBase64Decode(token))
     } catch (error) {
       return {
         statusCode: 401,

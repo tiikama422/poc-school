@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth'
+import { safeBase64Encode } from '@/lib/base64'
 import Link from 'next/link'
 
 export default function NewStudyRecord() {
@@ -75,7 +76,7 @@ export default function NewStudyRecord() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${btoa(JSON.stringify(user))}`
+          'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
         },
         body: JSON.stringify(formData)
       })

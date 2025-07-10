@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth'
+import { safeBase64Encode } from '@/lib/base64'
 import Link from 'next/link'
 
 export default function StudyRecords() {
@@ -41,7 +42,7 @@ export default function StudyRecords() {
       const response = await fetch(`/.netlify/functions/study-records?filter=${currentFilter}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${btoa(JSON.stringify(user))}`
+          'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
         }
       })
 
@@ -105,7 +106,7 @@ export default function StudyRecords() {
       const response = await fetch(`/.netlify/functions/study-records/${recordId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${btoa(JSON.stringify(user))}`
+          'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
         }
       })
 
