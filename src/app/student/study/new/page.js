@@ -10,6 +10,7 @@ export default function NewStudyRecord() {
   const [formData, setFormData] = useState({
     study_date: new Date().toISOString().split('T')[0], // 今日の日付
     subject_id: '',
+    sub_subject_id: '',
     hours: 0,
     minutes: 0,
     memo: ''
@@ -27,6 +28,50 @@ export default function NewStudyRecord() {
     { id: 6, name: 'その他', color: '#95A5A6', icon: '📝' }
   ]
 
+  const subSubjects = {
+    1: [ // 国語
+      { id: 1, name: '現代文B' },
+      { id: 2, name: '古典B' },
+      { id: 3, name: '国語総合' }
+    ],
+    2: [ // 数学
+      { id: 4, name: '数学Ⅰ' },
+      { id: 5, name: '数学Ⅱ' },
+      { id: 6, name: '数学Ⅲ' },
+      { id: 7, name: '数学A' },
+      { id: 8, name: '数学B' },
+      { id: 9, name: '数学C' }
+    ],
+    3: [ // 英語
+      { id: 10, name: '英語コミュニケーション' },
+      { id: 11, name: '論理・表現' },
+      { id: 12, name: '英語長文読解' },
+      { id: 13, name: '英文法・語法' },
+      { id: 14, name: '英単語・熟語' }
+    ],
+    4: [ // 理科
+      { id: 15, name: '物理基礎' },
+      { id: 16, name: '物理' },
+      { id: 17, name: '化学基礎' },
+      { id: 18, name: '化学' },
+      { id: 19, name: '生物基礎' },
+      { id: 20, name: '生物' },
+      { id: 21, name: '地学基礎' },
+      { id: 22, name: '地学' }
+    ],
+    5: [ // 社会
+      { id: 23, name: '現代社会' },
+      { id: 24, name: '倫理' },
+      { id: 25, name: '政治・経済' },
+      { id: 26, name: '日本史A' },
+      { id: 27, name: '日本史B' },
+      { id: 28, name: '世界史A' },
+      { id: 29, name: '世界史B' },
+      { id: 30, name: '地理A' },
+      { id: 31, name: '地理B' }
+    ]
+  }
+
   const timePresets = [
     { label: '15分', hours: 0, minutes: 15 },
     { label: '30分', hours: 0, minutes: 30 },
@@ -35,7 +80,11 @@ export default function NewStudyRecord() {
   ]
 
   const handleSubjectSelect = (subjectId) => {
-    setFormData(prev => ({ ...prev, subject_id: subjectId }))
+    setFormData(prev => ({ ...prev, subject_id: subjectId, sub_subject_id: '' }))
+  }
+
+  const handleSubSubjectSelect = (subSubjectId) => {
+    setFormData(prev => ({ ...prev, sub_subject_id: subSubjectId }))
   }
 
   const handleTimePreset = (preset) => {
@@ -215,6 +264,31 @@ export default function NewStudyRecord() {
                 </button>
               ))}
             </div>
+
+            {/* サブカテゴリ選択 */}
+            {formData.subject_id && subSubjects[formData.subject_id] && (
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <h3 className="text-lg font-medium text-white mb-4">
+                  サブカテゴリ選択（任意）
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {subSubjects[formData.subject_id].map((subSubject) => (
+                    <button
+                      key={subSubject.id}
+                      type="button"
+                      onClick={() => handleSubSubjectSelect(subSubject.id)}
+                      className={`p-3 rounded-lg border transition-all duration-300 text-sm ${
+                        formData.sub_subject_id === subSubject.id
+                          ? 'border-white bg-white/10 text-white'
+                          : 'border-white/20 hover:border-white/40 hover:bg-white/5 text-slate-300'
+                      }`}
+                    >
+                      {subSubject.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Step 3: メモ */}
