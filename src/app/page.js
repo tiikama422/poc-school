@@ -1,17 +1,19 @@
-import Hero from '@/components/Hero'
-import Features from '@/components/Features'
-import FAQ from '@/components/FAQ'
-import ContactForm from '@/components/ContactForm'
-import Navbar from '@/components/Navbar'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // ルートページにアクセスした場合、ログインページにリダイレクト
+    router.push('/login')
+  }, [router])
+
   return (
-    <main className="min-h-screen">
-      <Navbar />
-      <Hero />
-      <Features />
-      <FAQ />
-      <ContactForm />
-    </main>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="text-xl text-white">Redirecting to login...</div>
+    </div>
   )
 }
