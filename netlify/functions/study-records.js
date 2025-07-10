@@ -144,6 +144,16 @@ async function createStudyRecord(event, sessionUser, headers) {
 // 学習記録取得
 async function getStudyRecords(event, sessionUser, headers) {
   try {
+    // パスから記録IDを取得
+    const pathSegments = event.path.split('/')
+    const recordId = pathSegments[pathSegments.length - 1]
+    
+    // 特定のレコードを取得
+    if (recordId && recordId !== 'study-records') {
+      return await getSingleStudyRecord(recordId, sessionUser, headers)
+    }
+
+    // 一覧取得
     const queryParams = event.queryStringParameters || {}
     const { filter = 'all', limit = 50 } = queryParams
 
@@ -196,6 +206,54 @@ async function getStudyRecords(event, sessionUser, headers) {
       statusCode: 500,
       headers,
       body: JSON.stringify({ error: 'Failed to fetch study records' })
+    }
+  }
+}
+
+// 単一の学習記録取得
+async function getSingleStudyRecord(recordId, sessionUser, headers) {
+  try {
+    const { data, error } = await supabase
+      .from('study_records')
+      .select(`
+        *,
+        subjects(name, color)
+      `)
+      .eq('id', recordId)
+      .eq('student_email', sessionUser.email)
+      .single()
+
+    if (error) {
+      console.error('Database error:', error)
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Failed to fetch study record' })
+      }
+    }
+
+    if (!data) {
+      return {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({ error: 'Study record not found' })
+      }
+    }
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ 
+        success: true, 
+        data: data
+      })
+    }
+  } catch (error) {
+    console.error('Get single study record error:', error)
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: 'Failed to fetch study record' })
     }
   }
 }
