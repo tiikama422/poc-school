@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { setSessionUser } from '@/lib/auth'
 import Link from 'next/link'
 
 export default function Login() {
@@ -18,45 +18,33 @@ export default function Login() {
     setError('')
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
       })
 
-      if (error) {
-        setError(error.message)
-      } else {
-        router.push('/dashboard')
+      const result = await response.json()
+
+      if (!response.ok) {
+        setError(result.error)
+        return
       }
+
+      // セッションにユーザー情報を保存
+      setSessionUser(result.user)
+      
+      // ダッシュボードにリダイレクト
+      router.push('/dashboard')
     } catch (error) {
-      setError('An unexpected error occurred')
+      setError('予期しないエラーが発生しました')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleSignUp = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-
-      if (error) {
-        setError(error.message)
-      } else {
-        setError('Check your email for a confirmation link')
-      }
-    } catch (error) {
-      setError('An unexpected error occurred')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -135,24 +123,21 @@ export default function Login() {
             </div>
           )}
 
-          <div className="flex gap-4 pt-3">
+          <div className="pt-3">
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 py-4 px-7 bg-gradient-to-br from-slate-700 to-slate-600 text-white text-sm font-medium rounded-xl border border-white/10 shadow-lg hover:from-slate-600 hover:to-slate-500 hover:-translate-y-0.5 focus:outline-none focus:ring-0 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none uppercase tracking-wider relative overflow-hidden group"
+              className="w-full py-4 px-7 bg-gradient-to-br from-slate-700 to-slate-600 text-white text-sm font-medium rounded-xl border border-white/10 shadow-lg hover:from-slate-600 hover:to-slate-500 hover:-translate-y-0.5 focus:outline-none focus:ring-0 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none uppercase tracking-wider relative overflow-hidden group"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'ログイン中...' : 'ログイン'}
             </button>
-            <button
-              type="button"
-              onClick={handleSignUp}
-              disabled={isLoading}
-              className="flex-1 py-4 px-7 bg-black/20 backdrop-blur-sm text-slate-200 text-sm font-medium rounded-xl border border-white/10 hover:bg-black/30 hover:border-white/20 hover:-translate-y-0.5 focus:outline-none focus:ring-0 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none uppercase tracking-wider relative overflow-hidden group"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
-              {isLoading ? 'Signing up...' : 'Sign Up'}
-            </button>
+          </div>
+          
+          <div className="text-center pt-4">
+            <p className="text-slate-400 text-sm">
+              アカウントをお持ちでない場合は、管理者にお問い合わせください
+            </p>
           </div>
         </form>
       </div>

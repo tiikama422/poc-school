@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { getSessionUser, clearSessionUser } from '@/lib/auth'
 import Link from 'next/link'
 
 export default function Dashboard() {
@@ -11,30 +11,31 @@ export default function Dashboard() {
   const router = useRouter()
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
+    const checkSession = () => {
+      const sessionUser = getSessionUser()
       
-      if (error) {
-        console.error('Error getting session:', error)
+      if (!sessionUser) {
         router.push('/login')
         return
       }
 
-      if (!session) {
-        router.push('/login')
-        return
-      }
-
-      setUser(session.user)
+      setUser(sessionUser)
       setLoading(false)
     }
 
-    getSession()
+    checkSession()
   }, [router])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+      clearSessionUser()
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+      clearSessionUser()
+      router.push('/login')
+    }
   }
 
   if (loading) {
@@ -50,7 +51,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-light text-white tracking-wide">{user?.email}さんこんにちは</h1>
+          <h1 className="text-4xl font-light text-white tracking-wide">{user?.fullName || user?.email}さんこんにちは</h1>
           <div className="flex gap-4">
             <Link
               href="/"
@@ -165,6 +166,12 @@ export default function Dashboard() {
                   <div className="font-medium">学習計画</div>
                   <div className="text-slate-400 text-sm">週間スケジュールを確認</div>
                 </button>
+                {user?.isAdmin && (
+                  <Link href="/admin/users" className="w-full p-4 bg-gradient-to-r from-red-600/20 to-red-500/20 border border-red-500/30 rounded-lg text-white hover:from-red-600/30 hover:to-red-500/30 transition-all duration-300 text-left block">
+                    <div className="font-medium">ユーザー管理</div>
+                    <div className="text-slate-400 text-sm">ユーザーの承認・管理</div>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -179,8 +186,8 @@ export default function Dashboard() {
                   <div className="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-600 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <span className="text-2xl text-slate-300">Σ</span>
                   </div>
-                  <div className="text-white font-medium">{user?.email}</div>
-                  <div className="text-slate-400 text-sm">学習者</div>
+                  <div className="text-white font-medium">{user?.fullName || user?.email}</div>
+                  <div className="text-slate-400 text-sm">{user?.isAdmin ? '管理者' : '学習者'}</div>
                 </div>
                 <div className="pt-4 border-t border-white/10">
                   <div className="flex justify-between text-sm mb-2">
@@ -193,7 +200,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-400">学習開始日</span>
-                    <span className="text-white">{new Date(user?.created_at).toLocaleDateString('ja-JP')}</span>
+                    <span className="text-white">2024年4月1日</span>
                   </div>
                 </div>
               </div>
