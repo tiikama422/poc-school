@@ -21,21 +21,46 @@ export default function StudyRecords() {
   }
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const user = getSessionUser()
       if (!user || user.userType !== 'student') {
         router.push('/login')
         return
       }
       
-      // TODO: 実際のAPIから学習記録を取得
-      // 現在はダミーデータ
-      setRecords([])
-      setLoading(false)
+      await loadStudyRecords(user, filter)
     }
 
     checkAuth()
-  }, [router])
+  }, [router, filter])
+
+  const loadStudyRecords = async (user, currentFilter) => {
+    try {
+      setLoading(true)
+      
+      const response = await fetch(`/.netlify/functions/study-records?filter=${currentFilter}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${btoa(JSON.stringify(user))}`
+        }
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        console.error('Failed to load study records:', result.error)
+        setRecords([])
+        return
+      }
+
+      setRecords(result.data || [])
+    } catch (error) {
+      console.error('Load study records error:', error)
+      setRecords([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const formatTime = (hours, minutes) => {
     if (hours > 0 && minutes > 0) {
@@ -62,6 +87,40 @@ export default function StudyRecords() {
         month: '1月', 
         day: '1日' 
       })
+    }
+  }
+
+  const handleDeleteRecord = async (recordId) => {
+    if (!window.confirm('この学習記録を削除しますか？')) {
+      return
+    }
+
+    try {
+      const user = getSessionUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const response = await fetch(`/.netlify/functions/study-records/${recordId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${btoa(JSON.stringify(user))}`
+        }
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        alert(result.error || '削除に失敗しました')
+        return
+      }
+
+      // 成功時はレコードを再読み込み
+      await loadStudyRecords(user, filter)
+    } catch (error) {
+      console.error('Delete record error:', error)
+      alert('削除中にエラーが発生しました')
     }
   }
 
@@ -185,7 +244,7 @@ export default function StudyRecords() {
                       </svg>
                     </Link>
                     <button
-                      onClick={() => {/* TODO: 削除機能 */}}
+                      onClick={() => handleDeleteRecord(record.id)}
                       className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all duration-300"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

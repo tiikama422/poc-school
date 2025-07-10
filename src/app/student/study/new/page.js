@@ -70,16 +70,27 @@ export default function NewStudyRecord() {
         return
       }
 
-      // TODO: APIエンドポイントに送信
-      console.log('学習記録データ:', {
-        ...formData,
-        student_email: user.email
+      // APIエンドポイントに送信
+      const response = await fetch('/.netlify/functions/study-records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${btoa(JSON.stringify(user))}`
+        },
+        body: JSON.stringify(formData)
       })
 
-      // 一時的な成功処理
-      alert('学習記録が保存されました！')
+      const result = await response.json()
+
+      if (!response.ok) {
+        setError(result.error || '保存中にエラーが発生しました')
+        return
+      }
+
+      // 成功時の処理
       router.push('/student/study')
     } catch (error) {
+      console.error('Submit error:', error)
       setError('保存中にエラーが発生しました')
     } finally {
       setIsLoading(false)
