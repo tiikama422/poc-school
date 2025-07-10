@@ -1,3 +1,10 @@
+const { createClient } = require('@supabase/supabase-js')
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
+
 exports.handler = async (event, context) => {
   // CORS設定
   const headers = {
@@ -26,53 +33,37 @@ exports.handler = async (event, context) => {
   try {
     const { email, password } = JSON.parse(event.body)
 
-    // 簡易認証
-    const adminAccounts = {
-      'admin1@school.com': 'Admin123!',
-      'admin2@school.com': 'Admin456!'
-    }
+    // 新しい認証システムを使用
+    const { data, error } = await supabase.rpc('authenticate_user', {
+      p_email: email,
+      p_password: password
+    })
 
-    const studentAccounts = {
-      'student1@school.com': { password: 'Student123!', name: '田中太郎', grade: '高校3年', class: 'A組' },
-      'student2@school.com': { password: 'Student456!', name: '佐藤花子', grade: '高校2年', class: 'B組' },
-      'student3@school.com': { password: 'Student789!', name: '山田次郎', grade: '高校1年', class: 'C組' }
-    }
-
-    // 管理者チェック
-    if (adminAccounts[email] && adminAccounts[email] === password) {
+    if (error) {
+      console.error('Authentication error:', error)
       return {
-        statusCode: 200,
+        statusCode: 500,
         headers,
-        body: JSON.stringify({
-          success: true,
-          user: {
-            id: `admin-${Date.now()}`,
-            email: email,
-            fullName: email === 'admin1@school.com' ? '管理者1' : '管理者2',
-            userType: 'admin',
-            isAdmin: true
-          }
-        })
+        body: JSON.stringify({ error: 'データベースエラーが発生しました' })
       }
     }
 
-    // 生徒チェック
-    if (studentAccounts[email] && studentAccounts[email].password === password) {
-      const student = studentAccounts[email]
+    // 認証成功チェック
+    if (data && data.is_authenticated) {
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
           success: true,
           user: {
-            id: `student-${Date.now()}`,
-            email: email,
-            fullName: student.name,
-            userType: 'student',
-            isAdmin: false,
-            grade: student.grade,
-            className: student.class,
-            studentNumber: email.replace('@school.com', '').toUpperCase()
+            id: data.user_id,
+            email: data.email,
+            fullName: data.full_name,
+            userType: data.user_type,
+            isAdmin: data.user_type === 'admin',
+            grade: data.grade || null,
+            className: data.class_name || null,
+            studentNumber: data.student_number || null
           }
         })
       }
