@@ -72,12 +72,6 @@ export default function NewStudyRecord() {
     ]
   }
 
-  const timePresets = [
-    { label: '15分', hours: 0, minutes: 15 },
-    { label: '30分', hours: 0, minutes: 30 },
-    { label: '1時間', hours: 1, minutes: 0 },
-    { label: '2時間', hours: 2, minutes: 0 }
-  ]
 
   const handleSubjectSelect = (subjectId) => {
     setFormData(prev => ({ ...prev, subject_id: subjectId, sub_subject_id: '' }))
@@ -87,13 +81,6 @@ export default function NewStudyRecord() {
     setFormData(prev => ({ ...prev, sub_subject_id: subSubjectId }))
   }
 
-  const handleTimePreset = (preset) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      hours: preset.hours, 
-      minutes: preset.minutes 
-    }))
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -200,6 +187,7 @@ export default function NewStudyRecord() {
                       value={formData.hours}
                       onChange={(e) => setFormData(prev => ({ ...prev, hours: parseInt(e.target.value) || 0 }))}
                       className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
+                      placeholder="0"
                     />
                     <span className="text-slate-300 ml-2">時間</span>
                   </div>
@@ -208,27 +196,18 @@ export default function NewStudyRecord() {
                       type="number"
                       min="0"
                       max="59"
-                      step="5"
+                      step="1"
                       value={formData.minutes}
                       onChange={(e) => setFormData(prev => ({ ...prev, minutes: parseInt(e.target.value) || 0 }))}
                       className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
+                      placeholder="0"
                     />
                     <span className="text-slate-300 ml-2">分</span>
                   </div>
                 </div>
                 
-                {/* プリセットボタン */}
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {timePresets.map((preset, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleTimePreset(preset)}
-                      className="px-3 py-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-sm rounded-lg transition-colors"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+                <div className="text-slate-400 text-sm mt-2">
+                  例：1時間30分 → 1時間30分、45分 → 0時間45分
                 </div>
               </div>
             </div>
