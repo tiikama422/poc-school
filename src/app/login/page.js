@@ -19,7 +19,7 @@ export default function Login() {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/.netlify/functions/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,8 +37,12 @@ export default function Login() {
       // セッションにユーザー情報を保存
       setSessionUser(result.user)
       
-      // ダッシュボードにリダイレクト
-      router.push('/dashboard')
+      // ユーザータイプに応じてリダイレクト
+      if (result.user.userType === 'admin') {
+        router.push('/dashboard')  // 管理者は管理ダッシュボード
+      } else {
+        router.push('/student')    // 生徒は個人ページ
+      }
     } catch (error) {
       setError('予期しないエラーが発生しました')
     } finally {
