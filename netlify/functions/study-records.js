@@ -87,14 +87,16 @@ exports.handler = async (event, context) => {
 // 学習記録作成
 async function createStudyRecord(event, sessionUser, headers) {
   try {
-    const { study_date, subject_id, hours, minutes, memo } = JSON.parse(event.body)
+    const { study_date, subject_id, sub_subject_id, hours, minutes, memo } = JSON.parse(event.body)
+
+    console.log('Received data:', { study_date, subject_id, sub_subject_id, hours, minutes, memo })
 
     // バリデーション
-    if (!study_date || !subject_id || (hours === 0 && minutes < 5)) {
+    if (!study_date || !subject_id || (parseInt(hours) === 0 && parseInt(minutes) < 5)) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Invalid input data' })
+        body: JSON.stringify({ error: 'Invalid input data. Minimum 5 minutes required.' })
       }
     }
 
@@ -106,6 +108,7 @@ async function createStudyRecord(event, sessionUser, headers) {
           student_email: sessionUser.email,
           study_date,
           subject_id: parseInt(subject_id),
+          sub_subject_id: sub_subject_id ? parseInt(sub_subject_id) : null,
           hours: parseInt(hours) || 0,
           minutes: parseInt(minutes) || 0,
           memo: memo || null
@@ -272,14 +275,14 @@ async function updateStudyRecord(event, sessionUser, headers) {
       }
     }
 
-    const { study_date, subject_id, hours, minutes, memo } = JSON.parse(event.body)
+    const { study_date, subject_id, sub_subject_id, hours, minutes, memo } = JSON.parse(event.body)
 
     // バリデーション
-    if (!study_date || !subject_id || (hours === 0 && minutes < 5)) {
+    if (!study_date || !subject_id || (parseInt(hours) === 0 && parseInt(minutes) < 5)) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Invalid input data' })
+        body: JSON.stringify({ error: 'Invalid input data. Minimum 5 minutes required.' })
       }
     }
 
@@ -289,6 +292,7 @@ async function updateStudyRecord(event, sessionUser, headers) {
       .update({
         study_date,
         subject_id: parseInt(subject_id),
+        sub_subject_id: sub_subject_id ? parseInt(sub_subject_id) : null,
         hours: parseInt(hours) || 0,
         minutes: parseInt(minutes) || 0,
         memo: memo || null,
