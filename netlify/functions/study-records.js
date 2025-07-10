@@ -90,6 +90,11 @@ async function createStudyRecord(event, sessionUser, headers) {
     const { study_date, subject_id, sub_subject_id, hours, minutes, memo } = JSON.parse(event.body)
 
     console.log('Received data:', { study_date, subject_id, sub_subject_id, hours, minutes, memo })
+    console.log('Environment check:', {
+      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 20) + '...'
+    })
 
     // バリデーション
     if (!study_date || !subject_id || (parseInt(hours) === 0 && parseInt(minutes) < 5)) {
@@ -99,6 +104,8 @@ async function createStudyRecord(event, sessionUser, headers) {
         body: JSON.stringify({ error: 'Invalid input data. Minimum 5 minutes required.' })
       }
     }
+
+    console.log('Attempting database insert...')
 
     // 学習記録をデータベースに保存
     const { data, error } = await supabase
@@ -116,12 +123,18 @@ async function createStudyRecord(event, sessionUser, headers) {
       ])
       .select()
 
+    console.log('Database response:', { data, error })
+
     if (error) {
       console.error('Database error:', error)
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: 'Failed to save study record' })
+        body: JSON.stringify({ 
+          error: 'Failed to save study record',
+          details: error.message,
+          code: error.code
+        })
       }
     }
 
@@ -139,7 +152,11 @@ async function createStudyRecord(event, sessionUser, headers) {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to create study record' })
+      body: JSON.stringify({ 
+        error: 'Failed to create study record', 
+        details: error.message,
+        stack: error.stack?.substring(0, 200)
+      })
     }
   }
 }
