@@ -121,18 +121,112 @@ async function getStudyStats(studentEmail) {
     // 学習連続日数
     const streakDays = await getStudyStreak(studentEmail)
 
+    // 昨日の統計（比較用）
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    const yesterdayStr = yesterday.toISOString().split('T')[0]
+    const yesterdayStats = await getDayStats(studentEmail, yesterdayStr)
+
+    // 週間データ（グラフ用）
+    const weeklyData = await getWeeklyData(studentEmail, weekStart)
+
+    // 今週の科目別データ（円グラフ用）
+    const weeklySubjects = await getWeeklySubjectData(studentEmail, weekStartStr, todayStr)
+
     return {
       today: todayStats,
+      yesterday: yesterdayStats,
       thisWeek: weekStats,
       thisMonth: monthStats,
       subjects: subjectStats,
       recentRecords,
-      streakDays
+      streakDays,
+      dailyGoalMinutes: 120, // デフォルト目標時間（2時間）
+      weeklyData,
+      weeklySubjects,
+      upcomingEvents: [] // 将来的に実装
     }
   } catch (error) {
     console.error('Get study stats error:', error)
     throw error
   }
+}
+
+// 週間データを取得（グラフ用）
+async function getWeeklyData(studentEmail, weekStart) {
+  const weeklyData = []
+  
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(weekStart)
+    currentDate.setDate(weekStart.getDate() + i)
+    const dateStr = currentDate.toISOString().split('T')[0]
+    
+    const { data, error } = await supabase
+      .from('study_records')
+      .select('hours, minutes')
+      .eq('student_email', studentEmail)
+      .eq('study_date', dateStr)
+
+    let totalMinutes = 0
+    if (!error && data) {
+      totalMinutes = data.reduce((sum, record) => sum + (record.hours || 0) * 60 + (record.minutes || 0), 0)
+    }
+
+    const today = new Date().toISOString().split('T')[0]
+    
+    weeklyData.push({
+      date: dateStr,
+      dayOfWeek: i, // 0=月曜日, 6=日曜日
+      totalMinutes,
+      isToday: dateStr === today
+    })
+  }
+  
+  return weeklyData
+}
+
+// 今週の科目別データ（円グラフ用）
+async function getWeeklySubjectData(studentEmail, weekStart, weekEnd) {
+  const { data, error } = await supabase
+    .from('study_records')
+    .select(`
+      hours, 
+      minutes, 
+      subjects (
+        id,
+        name,
+        color
+      )
+    `)
+    .eq('student_email', studentEmail)
+    .gte('study_date', weekStart)
+    .lte('study_date', weekEnd)
+
+  if (error || !data) {
+    return []
+  }
+
+  const subjectData = {}
+  
+  data.forEach(record => {
+    const subject = record.subjects
+    if (!subject) return
+    
+    const minutes = (record.hours || 0) * 60 + (record.minutes || 0)
+    
+    if (!subjectData[subject.id]) {
+      subjectData[subject.id] = {
+        id: subject.id,
+        name: subject.name,
+        color: subject.color,
+        totalMinutes: 0
+      }
+    }
+    
+    subjectData[subject.id].totalMinutes += minutes
+  })
+  
+  return Object.values(subjectData).filter(subject => subject.totalMinutes > 0)
 }
 
 // 1日の統計データを取得
