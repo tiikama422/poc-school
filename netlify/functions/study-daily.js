@@ -117,7 +117,15 @@ exports.handler = async (event, context) => {
 
     console.log('Querying for user:', sessionUser.id, 'on date:', dateString)
     
-    // その日の学習記録を取得
+    // テスト用：まずstudy_recordsテーブルが存在するか確認
+    const { data: testRecords, error: testError } = await supabase
+      .from('study_records')
+      .select('id')
+      .limit(1)
+      
+    console.log('Table test:', { testRecords: testRecords?.length, testError })
+    
+    // まずsubjectsを含まずに基本的な記録を取得
     const { data: records, error: recordsError } = await supabase
       .from('study_records')
       .select(`
@@ -127,16 +135,32 @@ exports.handler = async (event, context) => {
         minutes,
         memo,
         created_at,
-        subject_id,
-        subjects (
-          id,
-          name,
-          color
-        )
+        subject_id
       `)
       .eq('user_id', sessionUser.id)
       .eq('study_date', dateString)
       .order('created_at', { ascending: true })
+      
+    console.log('Basic query result:', { records: records?.length, error: recordsError })
+    
+    // 記録が取得できた場合、科目情報を別途取得
+    let recordsWithSubjects = records
+    if (records && records.length > 0) {
+      const subjectIds = [...new Set(records.map(r => r.subject_id))]
+      const { data: subjects, error: subjectsError } = await supabase
+        .from('subjects')
+        .select('id, name, color')
+        .in('id', subjectIds)
+        
+      console.log('Subjects query:', { subjects: subjects?.length, subjectsError })
+      
+      if (subjects && !subjectsError) {
+        recordsWithSubjects = records.map(record => ({
+          ...record,
+          subjects: subjects.find(s => s.id === record.subject_id)
+        }))
+      }
+    }
       
     console.log('Query result:', { records: records?.length, error: recordsError })
 
@@ -156,7 +180,7 @@ exports.handler = async (event, context) => {
     const subjectSummary = {}
     let totalMinutes = 0
 
-    records.forEach(record => {
+    recordsWithSubjects.forEach(record => {
       const minutes = (record.hours || 0) * 60 + (record.minutes || 0)
       totalMinutes += minutes
 
@@ -184,14 +208,14 @@ exports.handler = async (event, context) => {
         success: true,
         data: {
           date: dateString,
-          records: records || [],
+          records: recordsWithSubjects || [],
           subjectSummary: subjectSummaryArray,
           totalMinutes,
           totalTime: {
             hours: Math.floor(totalMinutes / 60),
             minutes: totalMinutes % 60
           },
-          recordCount: records?.length || 0,
+          recordCount: recordsWithSubjects?.length || 0,
           subjectCount: subjectSummaryArray.length
         }
       })
