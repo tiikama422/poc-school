@@ -108,31 +108,12 @@ exports.handler = async (event, context) => {
 
 // 目標取得
 async function handleGetGoal(sessionUser, headers) {
-  // まずstudentsテーブルからuser_idを取得
-  console.log('GET: Looking for student with email:', sessionUser.email)
-  const { data: student, error: studentError } = await supabase
-    .from('students')
-    .select('id')
-    .eq('email', sessionUser.email)
-    .single()
-
-  console.log('GET: Student lookup result:', { student, studentError })
-
-  if (studentError || !student) {
-    console.error('GET: Student not found:', studentError)
-    return {
-      statusCode: 404,
-      headers,
-      body: JSON.stringify({ error: 'Student not found', details: studentError?.message })
-    }
-  }
-
-  // user_goalsテーブルから目標を取得
-  console.log('GET: Looking for goal with student.id:', student.id)
+  // user_goalsテーブルから目標を取得（student_emailを直接使用）
+  console.log('GET: Looking for goal with email:', sessionUser.email)
   const { data: goal, error } = await supabase
     .from('user_goals')
     .select('*')
-    .eq('user_id', student.id)
+    .eq('student_email', sessionUser.email)
     .single()
 
   console.log('GET: Goal lookup result:', { goal, error, errorCode: error?.code })
@@ -178,31 +159,12 @@ async function handleUpdateGoal(sessionUser, event, headers) {
     }
   }
 
-  // まずstudentsテーブルからuser_idを取得
-  console.log('PUT: Looking for student with email:', sessionUser.email)
-  const { data: student, error: studentError } = await supabase
-    .from('students')
-    .select('id')
-    .eq('email', sessionUser.email)
-    .single()
-
-  console.log('PUT: Student lookup result:', { student, studentError })
-
-  if (studentError || !student) {
-    console.error('PUT: Student not found:', studentError)
-    return {
-      statusCode: 404,
-      headers,
-      body: JSON.stringify({ error: 'Student not found', details: studentError?.message })
-    }
-  }
-
-  // 既存の目標があるかチェック
-  console.log('PUT: Checking for existing goal with student.id:', student.id)
+  // 既存の目標があるかチェック（student_emailを直接使用）
+  console.log('PUT: Checking for existing goal with email:', sessionUser.email)
   const { data: existingGoal, error: goalCheckError } = await supabase
     .from('user_goals')
     .select('*')
-    .eq('user_id', student.id)
+    .eq('student_email', sessionUser.email)
     .single()
 
   console.log('PUT: Existing goal check result:', { existingGoal, goalCheckError })
@@ -217,7 +179,7 @@ async function handleUpdateGoal(sessionUser, event, headers) {
         daily_goal_minutes: goalData.daily_goal_minutes,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', student.id)
+      .eq('student_email', sessionUser.email)
       .select()
 
     console.log('PUT: Update result:', { data, error })
@@ -228,7 +190,7 @@ async function handleUpdateGoal(sessionUser, event, headers) {
     const { data, error } = await supabase
       .from('user_goals')
       .insert([{
-        user_id: student.id,
+        student_email: sessionUser.email,
         daily_goal_minutes: goalData.daily_goal_minutes,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
