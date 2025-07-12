@@ -13,8 +13,8 @@ export default function TimePicker({ hours, minutes, onTimeChange }) {
   const hourOptions = Array.from({ length: 25 }, (_, i) => i)
   const minuteOptions = Array.from({ length: 12 }, (_, i) => i * 5)
   
-  const itemHeight = 40
-  const visibleItems = 5
+  const itemHeight = 32
+  const visibleItems = 3
   
   useEffect(() => {
     onTimeChange(selectedHour, selectedMinute)
@@ -88,10 +88,10 @@ export default function TimePicker({ hours, minutes, onTimeChange }) {
     return (
       <div className="flex flex-col items-center flex-1">
         <div className="text-sm text-slate-400 mb-2">{isHour ? '時間' : '分'}</div>
-        <div className="relative w-full max-w-[100px]">
+        <div className="relative w-full max-w-[80px]">
           <div 
             ref={ref}
-            className="h-[200px] overflow-y-auto scrollbar-hide picker-scroll"
+            className="h-[96px] overflow-y-auto scrollbar-hide picker-scroll"
             onScroll={(e) => handleScroll(e, type)}
             onWheel={(e) => handleWheel(e, type)}
             onTouchStart={() => setIsTouching(true)}
@@ -113,15 +113,15 @@ export default function TimePicker({ hours, minutes, onTimeChange }) {
               }, 50)
             }}
           >
-            <div className="py-[80px]">
+            <div className="py-[32px]">
               {options.map((value) => (
                 <div
                   key={value}
                   onClick={() => handleClick(value, type)}
-                  className={`h-[40px] flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                  className={`h-[32px] flex items-center justify-center cursor-pointer transition-all duration-200 ${
                     selectedValue === value 
-                      ? 'text-white text-lg font-semibold scale-110' 
-                      : 'text-slate-500 text-base hover:text-slate-300'
+                      ? 'text-white text-base font-semibold' 
+                      : 'text-slate-500 text-sm hover:text-slate-300'
                   }`}
                 >
                   {value}
@@ -131,9 +131,9 @@ export default function TimePicker({ hours, minutes, onTimeChange }) {
           </div>
           
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-0 right-0 h-[80px] bg-gradient-to-b from-black/90 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 right-0 h-[80px] bg-gradient-to-t from-black/90 to-transparent"></div>
-            <div className="absolute top-[80px] left-0 right-0 h-[40px] border-t border-b border-white/20"></div>
+            <div className="absolute top-0 left-0 right-0 h-[32px] bg-gradient-to-b from-black/90 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-[32px] bg-gradient-to-t from-black/90 to-transparent"></div>
+            <div className="absolute top-[32px] left-0 right-0 h-[32px] border-t border-b border-white/20"></div>
           </div>
         </div>
       </div>
@@ -141,18 +141,14 @@ export default function TimePicker({ hours, minutes, onTimeChange }) {
   }
   
   return (
-    <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10">
-      <div className="flex justify-center gap-4 sm:gap-8">
+    <div className="bg-black/30 backdrop-blur-sm rounded-xl p-3 border border-white/10 inline-block">
+      <div className="flex justify-center gap-3">
         {renderPickerColumn(hourOptions, selectedHour, 'hour', hourRef)}
         {renderPickerColumn(minuteOptions, selectedMinute, 'minute', minuteRef)}
       </div>
       
-      <div className="mt-4 text-center text-slate-300 text-sm sm:text-base">
-        選択中: {selectedHour}時間{selectedMinute}分
-      </div>
-      
-      <div className="mt-3 text-center text-slate-500 text-xs">
-        ホイールまたはスクロールで選択
+      <div className="mt-2 text-center text-slate-300 text-sm">
+        {selectedHour}時間{selectedMinute}分
       </div>
       
       <style jsx>{`

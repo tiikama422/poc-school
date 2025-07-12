@@ -179,15 +179,20 @@ export default function NewStudyRecord() {
               </div>
 
               {/* 学習時間 */}
-              <div className="col-span-full">
-                <label className="block text-slate-200 text-sm font-medium mb-4">
+              <div>
+                <label className="block text-slate-200 text-sm font-medium mb-2">
                   学習時間 *
                 </label>
-                <TimePicker 
-                  hours={formData.hours}
-                  minutes={formData.minutes}
-                  onTimeChange={handleTimeChange}
-                />
+                <div className="flex justify-start">
+                  <TimePicker 
+                    hours={formData.hours}
+                    minutes={formData.minutes}
+                    onTimeChange={handleTimeChange}
+                  />
+                </div>
+                <div className="text-slate-400 text-xs mt-2">
+                  スクロールまたはクリックで選択
+                </div>
               </div>
             </div>
           </div>

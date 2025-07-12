@@ -198,29 +198,36 @@ export default function EditStudyRecord() {
               </div>
 
               {/* 学習時間 */}
-              <div className="col-span-full">
-                <label className="block text-slate-200 text-sm font-medium mb-4">
+              <div>
+                <label className="block text-slate-200 text-sm font-medium mb-2">
                   学習時間 *
                 </label>
-                <TimePicker 
-                  hours={formData.hours}
-                  minutes={formData.minutes}
-                  onTimeChange={handleTimeChange}
-                />
-                
-                {/* プリセットボタン */}
-                <div className="flex flex-wrap gap-2 mt-4 justify-center">
-                  <span className="text-slate-400 text-sm mr-2">クイック選択:</span>
-                  {timePresets.map((preset, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleTimePreset(preset)}
-                      className="px-3 py-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-sm rounded-lg transition-colors"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+                <div className="flex items-start gap-4">
+                  <TimePicker 
+                    hours={formData.hours}
+                    minutes={formData.minutes}
+                    onTimeChange={handleTimeChange}
+                  />
+                  
+                  {/* プリセットボタン */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-slate-400 text-xs">クイック選択:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {timePresets.map((preset, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleTimePreset(preset)}
+                          className="px-2 py-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-xs rounded transition-colors"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-slate-400 text-xs mt-2">
+                  スクロールまたはクリックで選択
                 </div>
               </div>
             </div>
