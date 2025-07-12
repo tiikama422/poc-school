@@ -11,6 +11,11 @@ export default function StudyCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [events, setEvents] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
+  const [memos, setMemos] = useState({})
+  const [showModal, setShowModal] = useState(false)
+  const [modalDate, setModalDate] = useState(null)
+  const [currentMemo, setCurrentMemo] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -29,6 +34,7 @@ export default function StudyCalendar() {
 
       setUser(sessionUser)
       await loadEvents(sessionUser)
+      await loadMemos(sessionUser)
       setLoading(false)
     }
 
@@ -76,6 +82,21 @@ export default function StudyCalendar() {
       setEvents(sampleEvents)
     } catch (error) {
       console.error('Load events error:', error)
+    }
+  }
+
+  const loadMemos = async (user) => {
+    try {
+      // 実際の実装では、APIからメモデータを取得
+      // 現在はサンプルデータを使用
+      const sampleMemos = {
+        '2025-07-12': '今日は数学の復習を頑張った！',
+        '2025-07-13': '英語のリスニング練習をした',
+        '2025-07-14': '物理の公式を整理した'
+      }
+      setMemos(sampleMemos)
+    } catch (error) {
+      console.error('Load memos error:', error)
     }
   }
 
@@ -136,8 +157,69 @@ export default function StudyCalendar() {
 
   const handleDateClick = (day) => {
     if (day.isCurrentMonth) {
-      setSelectedDate(day)
+      const dateString = day.date.toISOString().split('T')[0]
+      setModalDate(day.date)
+      setCurrentMemo(memos[dateString] || '')
+      setIsEditing(!!memos[dateString])
+      setShowModal(true)
     }
+  }
+
+  const handleSaveMemo = async () => {
+    if (!modalDate) return
+    
+    const dateString = modalDate.toISOString().split('T')[0]
+    
+    if (currentMemo.trim()) {
+      // メモを保存
+      setMemos(prev => ({ ...prev, [dateString]: currentMemo.trim() }))
+    } else {
+      // 空の場合は削除
+      setMemos(prev => {
+        const newMemos = { ...prev }
+        delete newMemos[dateString]
+        return newMemos
+      })
+    }
+    
+    setShowModal(false)
+    setCurrentMemo('')
+    setModalDate(null)
+  }
+
+  const handleDeleteMemo = async () => {
+    if (!modalDate) return
+    
+    if (confirm('このメモを削除しますか？')) {
+      const dateString = modalDate.toISOString().split('T')[0]
+      setMemos(prev => {
+        const newMemos = { ...prev }
+        delete newMemos[dateString]
+        return newMemos
+      })
+      setShowModal(false)
+      setCurrentMemo('')
+      setModalDate(null)
+    }
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setCurrentMemo('')
+    setModalDate(null)
+  }
+
+  const getCharacterCount = (text) => {
+    // 全角文字を2、半角文字を1としてカウント
+    let count = 0
+    for (let char of text) {
+      count += char.match(/[^\x01-\x7E]/) ? 2 : 1
+    }
+    return count
+  }
+
+  const isOverLimit = (text) => {
+    return getCharacterCount(text) > 200
   }
 
   const isToday = (date) => {
@@ -215,13 +297,13 @@ export default function StudyCalendar() {
               </div>
 
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-1 md:gap-2">
                 {calendarDays.map((day, index) => (
                   <div
                     key={index}
                     onClick={() => handleDateClick(day)}
                     className={`
-                      relative min-h-[80px] p-2 rounded-lg cursor-pointer transition-all duration-200
+                      relative min-h-[48px] md:min-h-[80px] p-2 rounded-lg cursor-pointer transition-all duration-200
                       ${day.isCurrentMonth 
                         ? 'hover:bg-slate-700/30' 
                         : 'text-slate-600'
@@ -232,15 +314,29 @@ export default function StudyCalendar() {
                       }
                     `}
                   >
-                    <div className={`text-sm font-medium ${
-                      day.isCurrentMonth ? 'text-white' : 'text-slate-600'
-                    }`}>
-                      {day.date.getDate()}
+                    <div className="flex justify-between items-start">
+                      <div className={`text-sm font-medium ${
+                        day.isCurrentMonth ? 'text-white' : 'text-slate-600'
+                      }`}>
+                        {day.date.getDate()}
+                      </div>
+                      
+                      {/* Indicators */}
+                      <div className="flex gap-1">
+                        {/* Event indicator */}
+                        {day.events.length > 0 && (
+                          <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                        )}
+                        {/* Memo indicator */}
+                        {memos[day.date.toISOString().split('T')[0]] && (
+                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                        )}
+                      </div>
                     </div>
                     
                     {/* Events */}
                     <div className="mt-1 space-y-1">
-                      {day.events.slice(0, 2).map((event, eventIndex) => (
+                      {day.events.slice(0, 1).map((event, eventIndex) => (
                         <div
                           key={eventIndex}
                           className="text-xs px-1 py-0.5 rounded text-white truncate"
@@ -250,9 +346,9 @@ export default function StudyCalendar() {
                           {event.title}
                         </div>
                       ))}
-                      {day.events.length > 2 && (
+                      {day.events.length > 1 && (
                         <div className="text-xs text-slate-400">
-                          +{day.events.length - 2}件
+                          +{day.events.length - 1}件
                         </div>
                       )}
                     </div>
@@ -312,8 +408,17 @@ export default function StudyCalendar() {
                 クイックアクション
               </h3>
               <div className="space-y-3">
-                <button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-xl font-medium hover:from-blue-500 hover:to-blue-400 transition-all duration-300">
-                  ➕ 新しい予定を追加
+                <button 
+                  onClick={() => {
+                    const today = new Date()
+                    setModalDate(today)
+                    setCurrentMemo(memos[today.toISOString().split('T')[0]] || '')
+                    setIsEditing(!!memos[today.toISOString().split('T')[0]])
+                    setShowModal(true)
+                  }}
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white px-4 py-3 rounded-xl font-medium hover:from-purple-500 hover:to-purple-400 transition-all duration-300"
+                >
+                  📝 今日のメモを追加
                 </button>
                 <Link 
                   href="/student/study/new"
@@ -330,42 +435,136 @@ export default function StudyCalendar() {
               </div>
             </div>
 
-            {/* Selected Date Info */}
-            {selectedDate && (
-              <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">
-                  {selectedDate.date.toLocaleDateString('ja-JP', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    weekday: 'long'
-                  })}
-                </h3>
-                
-                {selectedDate.events.length > 0 ? (
-                  <div className="space-y-2">
-                    {selectedDate.events.map((event) => (
-                      <div key={event.id} className="p-3 bg-black/20 rounded-lg">
-                        <div className="text-white font-medium">{event.title}</div>
-                        <div className="text-slate-400 text-sm mt-1">{event.description}</div>
-                        <div 
-                          className="inline-block px-2 py-1 rounded text-xs text-white mt-2"
-                          style={{ backgroundColor: event.color }}
-                        >
-                          {event.type}
-                        </div>
-                      </div>
-                    ))}
+            {/* Today's Memo */}
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <span className="mr-3 text-2xl">📝</span>
+                今日のメモ
+              </h3>
+              
+              {(() => {
+                const today = new Date().toISOString().split('T')[0]
+                const todayMemo = memos[today]
+                return todayMemo ? (
+                  <div className="p-3 bg-black/20 rounded-lg">
+                    <div className="text-white text-sm">{todayMemo}</div>
                   </div>
                 ) : (
                   <div className="text-center py-4 text-slate-400">
-                    <div className="text-sm">この日に予定はありません</div>
+                    <div className="text-sm">今日のメモはまだありません</div>
+                    <button
+                      onClick={() => {
+                        const today = new Date()
+                        setModalDate(today)
+                        setCurrentMemo('')
+                        setIsEditing(false)
+                        setShowModal(true)
+                      }}
+                      className="mt-2 text-blue-400 hover:text-blue-300 text-sm"
+                    >
+                      メモを追加する
+                    </button>
+                  </div>
+                )
+              })()} 
+            </div>
+          </div>
+        </div>
+
+        {/* Modal */}
+        {showModal && modalDate && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-md mx-4">
+              {/* Modal Header */}
+              <div className="p-6 border-b border-white/10">
+                <h3 className="text-xl font-semibold text-white">
+                  {modalDate.toLocaleDateString('ja-JP', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })} のメモ
+                </h3>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6">
+                <div className="mb-4">
+                  <label className="block text-slate-300 text-sm font-medium mb-2">
+                    ひとこと日記
+                  </label>
+                  <textarea
+                    value={currentMemo}
+                    onChange={(e) => setCurrentMemo(e.target.value)}
+                    placeholder="今日の学習や気づきを記録しましょう..."
+                    rows="3"
+                    className={`w-full px-3 py-2 bg-black/20 backdrop-blur-sm border rounded-lg text-white placeholder-slate-500 focus:outline-none transition-all duration-300 resize-none ${
+                      isOverLimit(currentMemo) 
+                        ? 'border-red-500 focus:border-red-400' 
+                        : 'border-white/10 focus:border-white/30'
+                    }`}
+                  />
+                  <div className={`text-right text-xs mt-1 ${
+                    isOverLimit(currentMemo) ? 'text-red-400' : 'text-slate-400'
+                  }`}>
+                    {getCharacterCount(currentMemo)}/200文字
+                  </div>
+                </div>
+
+                {/* Events for this date */}
+                {events.filter(event => event.date === modalDate.toISOString().split('T')[0]).length > 0 && (
+                  <div className="mb-4">
+                    <label className="block text-slate-300 text-sm font-medium mb-2">
+                      この日の予定
+                    </label>
+                    <div className="space-y-2">
+                      {events
+                        .filter(event => event.date === modalDate.toISOString().split('T')[0])
+                        .map((event) => (
+                        <div key={event.id} className="p-2 bg-black/20 rounded-lg">
+                          <div className="text-white text-sm font-medium">{event.title}</div>
+                          <div className="text-slate-400 text-xs">{event.description}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
-            )}
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-white/10 flex justify-between">
+                <div className="flex gap-2">
+                  {isEditing && (
+                    <button
+                      onClick={handleDeleteMemo}
+                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                      title="削除"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 text-slate-300 hover:text-white transition-colors"
+                  >
+                    閉じる
+                  </button>
+                  <button
+                    onClick={handleSaveMemo}
+                    disabled={isOverLimit(currentMemo)}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isEditing ? '更新' : '保存'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
