@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth'
+import { safeBase64Encode } from '@/lib/base64'
 import Link from 'next/link'
+import EventModal from '@/components/EventModal'
 
 export default function StudyCalendar() {
   const [user, setUser] = useState(null)
@@ -16,6 +18,9 @@ export default function StudyCalendar() {
   const [modalDate, setModalDate] = useState(null)
   const [currentMemo, setCurrentMemo] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const [showEventModal, setShowEventModal] = useState(false)
+  const [editingEvent, setEditingEvent] = useState(null)
+  const [eventModalDate, setEventModalDate] = useState(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -43,45 +48,24 @@ export default function StudyCalendar() {
 
   const loadEvents = async (user) => {
     try {
-      // 実際の実装では、APIから予定データを取得
-      // 現在はサンプルデータを使用
-      const sampleEvents = [
-        {
-          id: 1,
-          date: '2025-07-15',
-          title: '数学テスト',
-          type: 'テスト',
-          color: '#3498DB',
-          description: '数学Ⅱ 微分・積分'
-        },
-        {
-          id: 2,
-          date: '2025-07-18',
-          title: '英語小テスト',
-          type: '小テスト',
-          color: '#2ECC71',
-          description: '英単語 Unit 5-6'
-        },
-        {
-          id: 3,
-          date: '2025-07-22',
-          title: '物理レポート提出',
-          type: '提出物',
-          color: '#9B59B6',
-          description: '力学実験レポート'
-        },
-        {
-          id: 4,
-          date: '2025-07-25',
-          title: '期末試験開始',
-          type: '試験',
-          color: '#E74C3C',
-          description: '1学期期末試験'
+      const response = await fetch('/.netlify/functions/events', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
         }
-      ]
-      setEvents(sampleEvents)
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setEvents(result.data || [])
+      } else {
+        console.error('Failed to load events:', result.error)
+        setEvents([])
+      }
     } catch (error) {
       console.error('Load events error:', error)
+      setEvents([])
     }
   }
 
@@ -207,6 +191,96 @@ export default function StudyCalendar() {
     setShowModal(false)
     setCurrentMemo('')
     setModalDate(null)
+  }
+
+  // 予定関連の関数
+  const handleAddEvent = (date = null) => {
+    setEditingEvent(null)
+    setEventModalDate(date)
+    setShowEventModal(true)
+  }
+
+  const handleEditEvent = (event) => {
+    setEditingEvent(event)
+    setEventModalDate(null)
+    setShowEventModal(true)
+  }
+
+  const handleSaveEvent = async (eventData) => {
+    try {
+      if (editingEvent) {
+        // 更新
+        const response = await fetch(`/.netlify/functions/events/${editingEvent.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
+          },
+          body: JSON.stringify(eventData)
+        })
+
+        if (response.ok) {
+          await loadEvents(user)
+          setShowEventModal(false)
+          setEditingEvent(null)
+        } else {
+          const result = await response.json()
+          alert('予定の更新に失敗しました: ' + result.error)
+        }
+      } else {
+        // 新規作成
+        const response = await fetch('/.netlify/functions/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
+          },
+          body: JSON.stringify(eventData)
+        })
+
+        if (response.ok) {
+          await loadEvents(user)
+          setShowEventModal(false)
+        } else {
+          const result = await response.json()
+          alert('予定の作成に失敗しました: ' + result.error)
+        }
+      }
+    } catch (error) {
+      console.error('Save event error:', error)
+      alert('予定の保存中にエラーが発生しました')
+    }
+  }
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!confirm('この予定を削除しますか？')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/.netlify/functions/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
+        }
+      })
+
+      if (response.ok) {
+        await loadEvents(user)
+      } else {
+        const result = await response.json()
+        alert('予定の削除に失敗しました: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Delete event error:', error)
+      alert('予定の削除中にエラーが発生しました')
+    }
+  }
+
+  const handleCloseEventModal = () => {
+    setShowEventModal(false)
+    setEditingEvent(null)
+    setEventModalDate(null)
   }
 
   const getCharacterCount = (text) => {
@@ -370,9 +444,9 @@ export default function StudyCalendar() {
               {upcomingEvents.length > 0 ? (
                 <div className="space-y-3">
                   {upcomingEvents.map((event) => (
-                    <div key={event.id} className="p-3 bg-black/20 rounded-lg">
+                    <div key={event.id} className="p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-colors group">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="text-white font-medium text-sm">{event.title}</div>
                           <div className="text-slate-400 text-xs mt-1">{event.description}</div>
                           <div className="text-slate-500 text-xs mt-1">
@@ -383,11 +457,33 @@ export default function StudyCalendar() {
                             })}
                           </div>
                         </div>
-                        <div 
-                          className="px-2 py-1 rounded text-xs text-white"
-                          style={{ backgroundColor: event.color }}
-                        >
-                          {event.type}
+                        <div className="flex items-center gap-2 ml-2">
+                          <div 
+                            className="px-2 py-1 rounded text-xs text-white"
+                            style={{ backgroundColor: event.color }}
+                          >
+                            {event.type}
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            <button
+                              onClick={() => handleEditEvent(event)}
+                              className="p-1 text-slate-400 hover:text-blue-400 rounded transition-colors"
+                              title="編集"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteEvent(event.id)}
+                              className="p-1 text-slate-400 hover:text-red-400 rounded transition-colors"
+                              title="削除"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -408,6 +504,12 @@ export default function StudyCalendar() {
                 クイックアクション
               </h3>
               <div className="space-y-3">
+                <button 
+                  onClick={() => handleAddEvent()}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-xl font-medium hover:from-blue-500 hover:to-blue-400 transition-all duration-300"
+                >
+                  📅 新しい予定を追加
+                </button>
                 <button 
                   onClick={() => {
                     const today = new Date()

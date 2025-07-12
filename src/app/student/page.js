@@ -8,11 +8,14 @@ import Link from 'next/link'
 import CircularProgress from '@/components/CircularProgress'
 import WeeklyChart from '@/components/WeeklyChart'
 import SubjectPieChart from '@/components/SubjectPieChart'
+import GoalModal from '@/components/GoalModal'
 
 export default function StudentDashboard() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState(null)
+  const [showGoalModal, setShowGoalModal] = useState(false)
+  const [dailyGoal, setDailyGoal] = useState(120)
   const router = useRouter()
 
   useEffect(() => {
@@ -31,6 +34,7 @@ export default function StudentDashboard() {
 
       setUser(sessionUser)
       await loadStats(sessionUser)
+      await loadGoal(sessionUser)
       setLoading(false)
     }
 
@@ -61,6 +65,56 @@ export default function StudentDashboard() {
     }
   }
 
+  const loadGoal = async (user) => {
+    try {
+      const response = await fetch('/.netlify/functions/goal', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
+        }
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setDailyGoal(result.data?.daily_goal_minutes || 120)
+      } else {
+        console.error('Failed to load goal:', result.error)
+        setDailyGoal(120) // デフォルト値
+      }
+    } catch (error) {
+      console.error('Load goal error:', error)
+      setDailyGoal(120) // デフォルト値
+    }
+  }
+
+  const handleSaveGoal = async (goalMinutes) => {
+    try {
+      const response = await fetch('/.netlify/functions/goal', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
+        },
+        body: JSON.stringify({ daily_goal_minutes: goalMinutes })
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setDailyGoal(goalMinutes)
+        setShowGoalModal(false)
+        // 統計データを再読み込みして更新
+        await loadStats(user)
+      } else {
+        alert('目標の設定に失敗しました: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Save goal error:', error)
+      alert('目標の設定中にエラーが発生しました')
+    }
+  }
+
   const handleLogout = async () => {
     clearSessionUser()
     router.push('/login')
@@ -87,8 +141,8 @@ export default function StudentDashboard() {
     }
   }
   
-  const calculateGoalPercentage = (currentMinutes, goalMinutes) => {
-    return goalMinutes > 0 ? Math.min((currentMinutes / goalMinutes) * 100, 100) : 0
+  const calculateGoalPercentage = (currentMinutes) => {
+    return dailyGoal > 0 ? Math.min((currentMinutes / dailyGoal) * 100, 100) : 0
   }
   
   const renderTimeComparison = (todayMinutes, yesterdayMinutes) => {
@@ -208,12 +262,12 @@ export default function StudentDashboard() {
                 {/* Goal Achievement Circle */}
                 <div className="flex flex-col items-center">
                   <CircularProgress 
-                    percentage={calculateGoalPercentage(stats?.today?.totalMinutes || 0, stats?.dailyGoalMinutes || 120)}
+                    percentage={calculateGoalPercentage(stats?.today?.totalMinutes || 0)}
                     size={100}
                   >
                     <div className="text-center">
                       <div className="text-lg font-bold text-white">
-                        {Math.round(calculateGoalPercentage(stats?.today?.totalMinutes || 0, stats?.dailyGoalMinutes || 120))}%
+                        {Math.round(calculateGoalPercentage(stats?.today?.totalMinutes || 0))}%
                       </div>
                       <div className="text-xs text-slate-400">達成</div>
                     </div>
@@ -222,9 +276,15 @@ export default function StudentDashboard() {
                     <div className="text-sm text-slate-300">
                       目標まで{' '}
                       <span className="text-blue-400 font-medium">
-                        {Math.max(0, (stats?.dailyGoalMinutes || 120) - (stats?.today?.totalMinutes || 0))}分
+                        {Math.max(0, dailyGoal - (stats?.today?.totalMinutes || 0))}分
                       </span>
                     </div>
+                    <button
+                      onClick={() => setShowGoalModal(true)}
+                      className="mt-1 text-xs text-slate-400 hover:text-blue-400 transition-colors"
+                    >
+                      目標設定 (現在: {Math.floor(dailyGoal / 60)}時間{dailyGoal % 60}分)
+                    </button>
                   </div>
                 </div>
                 
@@ -464,6 +524,14 @@ export default function StudentDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Goal Modal */}
+        <GoalModal
+          isOpen={showGoalModal}
+          onClose={() => setShowGoalModal(false)}
+          onSave={handleSaveGoal}
+          currentGoal={dailyGoal}
+        />
       </div>
     </div>
   )
