@@ -169,7 +169,7 @@ export default function DailyStudyDetail() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-light text-white tracking-wide">
-              {dateInfo.formatted} ({dateInfo.dayOfWeek}) のきろく
+              {dateInfo.formatted} ({dateInfo.dayOfWeek}) の記録
             </h1>
             <div className="mt-2 flex items-center gap-6 text-slate-300">
               <span>合計学習時間: <span className="text-blue-400 font-medium">{formatTime(totalMinutes)}</span></span>
