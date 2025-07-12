@@ -25,6 +25,16 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    // 環境変数のチェック
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing environment variables')
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Server configuration error' })
+      }
+    }
+    
     // 認証チェック
     const authHeader = event.headers.authorization || event.headers.Authorization
     if (!authHeader) {
