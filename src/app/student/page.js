@@ -36,6 +36,11 @@ export default function StudentDashboard() {
 
   const loadStats = async (user) => {
     try {
+      if (!user) {
+        console.error('User is null or undefined')
+        return
+      }
+      
       const response = await fetch('/.netlify/functions/study-stats', {
         method: 'GET',
         headers: {
@@ -233,42 +238,6 @@ export default function StudentDashboard() {
 
           {/* Right Column - Quick Actions & Stats */}
           <div className="space-y-6">
-            {/* This Week Stats */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📈</span>
-                今週の学習
-              </h2>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">総学習時間</span>
-                  <span className="text-white font-medium">
-                    {stats?.thisWeek?.totalHours || 0}時間
-                    {stats?.thisWeek?.totalMinutes > 0 && `${stats.thisWeek.totalMinutes}分`}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">学習日数</span>
-                  <span className="text-white font-medium">{stats?.thisWeek?.studyDays || 0}日</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">記録数</span>
-                  <span className="text-white font-medium">{stats?.thisWeek?.recordCount || 0}件</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">最も学習した科目</span>
-                  <span className="text-white font-medium">
-                    {stats?.thisWeek?.mostStudiedSubject ? (
-                      stats.thisWeek.mostStudiedSubject === 1 ? '国語' :
-                      stats.thisWeek.mostStudiedSubject === 2 ? '数学' :
-                      stats.thisWeek.mostStudiedSubject === 3 ? '英語' :
-                      stats.thisWeek.mostStudiedSubject === 4 ? '理科' :
-                      stats.thisWeek.mostStudiedSubject === 5 ? '社会' : 'その他'
-                    ) : '-'}
-                  </span>
-                </div>
-              </div>
-            </div>
 
             {/* Subject Overview */}
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
