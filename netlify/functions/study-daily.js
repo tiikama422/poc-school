@@ -17,6 +17,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 exports.handler = async (event, context) => {
+  console.log('=== study-daily function started ===')
+  
   // CORS設定
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -26,6 +28,7 @@ exports.handler = async (event, context) => {
 
   // プリフライトリクエスト対応
   if (event.httpMethod === 'OPTIONS') {
+    console.log('OPTIONS request received')
     return {
       statusCode: 200,
       headers,
@@ -34,6 +37,7 @@ exports.handler = async (event, context) => {
   }
 
   if (event.httpMethod !== 'GET') {
+    console.log('Invalid method:', event.httpMethod)
     return {
       statusCode: 405,
       headers,
@@ -42,6 +46,8 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('Starting main logic...')
+    
     // 環境変数のチェック
     console.log('Environment check:', {
       supabaseUrl: !!supabaseUrl,
@@ -62,162 +68,16 @@ exports.handler = async (event, context) => {
       }
     }
     
-    // 認証チェック
-    const authHeader = event.headers.authorization || event.headers.Authorization
-    if (!authHeader) {
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: 'Authorization header is required' })
-      }
-    }
-
-    // セッションユーザーの取得
-    let sessionUser
-    try {
-      const token = authHeader.replace('Bearer ', '')
-      sessionUser = JSON.parse(safeBase64Decode(token))
-    } catch (error) {
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: 'Invalid authorization token' })
-      }
-    }
-
-    if (!sessionUser || sessionUser.userType !== 'student') {
-      return {
-        statusCode: 403,
-        headers,
-        body: JSON.stringify({ error: 'Access denied' })
-      }
-    }
-
-    // 日付パラメータを取得
-    const { date } = event.queryStringParameters || {}
-    if (!date) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'Date parameter is required' })
-      }
-    }
-
-    // 日付の妥当性チェック
-    const targetDate = new Date(date)
-    if (isNaN(targetDate.getTime())) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'Invalid date format' })
-      }
-    }
-
-    const dateString = targetDate.toISOString().split('T')[0]
-
-    console.log('Querying for user:', sessionUser.id, 'on date:', dateString)
+    console.log('Environment variables OK')
     
-    // テスト用：まずstudy_recordsテーブルが存在するか確認
-    const { data: testRecords, error: testError } = await supabase
-      .from('study_records')
-      .select('id')
-      .limit(1)
-      
-    console.log('Table test:', { testRecords: testRecords?.length, testError })
-    
-    // まずsubjectsを含まずに基本的な記録を取得
-    const { data: records, error: recordsError } = await supabase
-      .from('study_records')
-      .select(`
-        id,
-        study_date,
-        hours,
-        minutes,
-        memo,
-        created_at,
-        subject_id
-      `)
-      .eq('user_id', sessionUser.id)
-      .eq('study_date', dateString)
-      .order('created_at', { ascending: true })
-      
-    console.log('Basic query result:', { records: records?.length, error: recordsError })
-    
-    // 記録が取得できた場合、科目情報を別途取得
-    let recordsWithSubjects = records
-    if (records && records.length > 0) {
-      const subjectIds = [...new Set(records.map(r => r.subject_id))]
-      const { data: subjects, error: subjectsError } = await supabase
-        .from('subjects')
-        .select('id, name, color')
-        .in('id', subjectIds)
-        
-      console.log('Subjects query:', { subjects: subjects?.length, subjectsError })
-      
-      if (subjects && !subjectsError) {
-        recordsWithSubjects = records.map(record => ({
-          ...record,
-          subjects: subjects.find(s => s.id === record.subject_id)
-        }))
-      }
-    }
-      
-    console.log('Query result:', { records: records?.length, error: recordsError })
-
-    if (recordsError) {
-      console.error('Records fetch error:', recordsError)
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ 
-          error: 'Failed to fetch study records',
-          details: recordsError.message || recordsError
-        })
-      }
-    }
-
-    // 科目別サマリーを計算
-    const subjectSummary = {}
-    let totalMinutes = 0
-
-    recordsWithSubjects.forEach(record => {
-      const minutes = (record.hours || 0) * 60 + (record.minutes || 0)
-      totalMinutes += minutes
-
-      const subjectId = record.subjects?.id
-      const subjectName = record.subjects?.name || '不明な科目'
-      const subjectColor = record.subjects?.color || '#95A5A6'
-
-      if (!subjectSummary[subjectId]) {
-        subjectSummary[subjectId] = {
-          id: subjectId,
-          name: subjectName,
-          color: subjectColor,
-          totalMinutes: 0
-        }
-      }
-      subjectSummary[subjectId].totalMinutes += minutes
-    })
-
-    const subjectSummaryArray = Object.values(subjectSummary)
-
+    // まずは基本的なレスポンスを返す
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        data: {
-          date: dateString,
-          records: recordsWithSubjects || [],
-          subjectSummary: subjectSummaryArray,
-          totalMinutes,
-          totalTime: {
-            hours: Math.floor(totalMinutes / 60),
-            minutes: totalMinutes % 60
-          },
-          recordCount: recordsWithSubjects?.length || 0,
-          subjectCount: subjectSummaryArray.length
-        }
+        message: 'Basic function test successful',
+        timestamp: new Date().toISOString()
       })
     }
 

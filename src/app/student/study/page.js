@@ -39,7 +39,7 @@ export default function StudyRecords() {
     try {
       setLoading(true)
       
-      const response = await fetch(`/api/study-records?filter=${currentFilter}`, {
+      const response = await fetch(`/.netlify/functions/study-records?filter=${currentFilter}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
@@ -103,7 +103,7 @@ export default function StudyRecords() {
         return
       }
 
-      const response = await fetch(`/api/study-records/${recordId}`, {
+      const response = await fetch(`/.netlify/functions/study-records/${recordId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`

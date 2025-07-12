@@ -113,7 +113,7 @@ export default function NewStudyRecord() {
       }
 
       // APIエンドポイントに送信
-      const response = await fetch('/api/study-records', {
+      const response = await fetch('/.netlify/functions/study-records', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +172,6 @@ export default function NewStudyRecord() {
                   type="date"
                   value={formData.study_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, study_date: e.target.value }))}
-                  max={new Date().toISOString().split('T')[0]}
                   className="w-full px-4 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
                   required
                 />
