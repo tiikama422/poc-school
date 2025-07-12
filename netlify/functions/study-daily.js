@@ -45,7 +45,12 @@ exports.handler = async (event, context) => {
     // 環境変数のチェック
     console.log('Environment check:', {
       supabaseUrl: !!supabaseUrl,
-      supabaseServiceKey: !!supabaseServiceKey
+      supabaseServiceKey: !!supabaseServiceKey,
+      event: {
+        httpMethod: event.httpMethod,
+        headers: Object.keys(event.headers || {}),
+        queryStringParameters: event.queryStringParameters
+      }
     })
     
     if (!supabaseUrl || !supabaseServiceKey) {
@@ -110,6 +115,8 @@ exports.handler = async (event, context) => {
 
     const dateString = targetDate.toISOString().split('T')[0]
 
+    console.log('Querying for user:', sessionUser.id, 'on date:', dateString)
+    
     // その日の学習記録を取得
     const { data: records, error: recordsError } = await supabase
       .from('study_records')
@@ -120,6 +127,7 @@ exports.handler = async (event, context) => {
         minutes,
         memo,
         created_at,
+        subject_id,
         subjects (
           id,
           name,
@@ -129,13 +137,18 @@ exports.handler = async (event, context) => {
       .eq('user_id', sessionUser.id)
       .eq('study_date', dateString)
       .order('created_at', { ascending: true })
+      
+    console.log('Query result:', { records: records?.length, error: recordsError })
 
     if (recordsError) {
       console.error('Records fetch error:', recordsError)
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: 'Failed to fetch study records' })
+        body: JSON.stringify({ 
+          error: 'Failed to fetch study records',
+          details: recordsError.message || recordsError
+        })
       }
     }
 
@@ -189,7 +202,10 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' })
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message || error.toString()
+      })
     }
   }
 }
