@@ -76,7 +76,7 @@ exports.handler = async (event, context) => {
     }
 
     // 統計データの取得
-    const stats = await getStudyStats(sessionUser.id)
+    const stats = await getStudyStats(sessionUser.email)
 
     return {
       statusCode: 200,
@@ -97,7 +97,7 @@ exports.handler = async (event, context) => {
 }
 
 // 学習統計データの取得
-async function getStudyStats(userId) {
+async function getStudyStats(studentEmail) {
   try {
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
@@ -114,37 +114,37 @@ async function getStudyStats(userId) {
     const monthStartStr = monthStart.toISOString().split('T')[0]
 
     // 今日の統計
-    const todayStats = await getDayStats(userId, todayStr)
+    const todayStats = await getDayStats(studentEmail, todayStr)
     
     // 今週の統計
-    const weekStats = await getPeriodStats(userId, weekStartStr, todayStr)
+    const weekStats = await getPeriodStats(studentEmail, weekStartStr, todayStr)
     
     // 今月の統計
-    const monthStats = await getPeriodStats(userId, monthStartStr, todayStr)
+    const monthStats = await getPeriodStats(studentEmail, monthStartStr, todayStr)
 
     // 科目別統計（今週）
-    const subjectStats = await getSubjectStats(userId, weekStartStr, todayStr)
+    const subjectStats = await getSubjectStats(studentEmail, weekStartStr, todayStr)
 
     // 最近の学習記録（5件）
-    const recentRecords = await getRecentRecords(userId, 5)
+    const recentRecords = await getRecentRecords(studentEmail, 5)
 
     // 学習連続日数
-    const streakDays = await getStudyStreak(userId)
+    const streakDays = await getStudyStreak(studentEmail)
 
     // 昨日の統計（比較用）
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)
     const yesterdayStr = yesterday.toISOString().split('T')[0]
-    const yesterdayStats = await getDayStats(userId, yesterdayStr)
+    const yesterdayStats = await getDayStats(studentEmail, yesterdayStr)
 
     // 週間データ（グラフ用）
-    const weeklyData = await getWeeklyData(userId, weekStart)
+    const weeklyData = await getWeeklyData(studentEmail, weekStart)
 
     // 今週の科目別データ（円グラフ用）
-    const weeklySubjects = await getWeeklySubjectData(userId, weekStartStr, todayStr)
+    const weeklySubjects = await getWeeklySubjectData(studentEmail, weekStartStr, todayStr)
 
     // 今後の予定（実データ）
-    const upcomingEvents = await getUpcomingEvents(userId)
+    const upcomingEvents = await getUpcomingEvents(studentEmail)
 
     return {
       today: todayStats,
@@ -166,7 +166,7 @@ async function getStudyStats(userId) {
 }
 
 // 週間データを取得（グラフ用）
-async function getWeeklyData(userId, weekStart) {
+async function getWeeklyData(studentEmail, weekStart) {
   const weeklyData = []
   
   for (let i = 0; i < 7; i++) {
@@ -177,7 +177,7 @@ async function getWeeklyData(userId, weekStart) {
     const { data, error } = await supabase
       .from('study_records')
       .select('hours, minutes')
-      .eq('user_id', userId)
+      .eq('student_email', studentEmail)
       .eq('study_date', dateStr)
 
     let totalMinutes = 0
@@ -199,7 +199,7 @@ async function getWeeklyData(userId, weekStart) {
 }
 
 // 今週の科目別データ（円グラフ用）
-async function getWeeklySubjectData(userId, weekStart, weekEnd) {
+async function getWeeklySubjectData(studentEmail, weekStart, weekEnd) {
   const { data, error } = await supabase
     .from('study_records')
     .select(`
@@ -211,7 +211,7 @@ async function getWeeklySubjectData(userId, weekStart, weekEnd) {
         color
       )
     `)
-    .eq('user_id', userId)
+    .eq('student_email', studentEmail)
     .gte('study_date', weekStart)
     .lte('study_date', weekEnd)
 
@@ -243,11 +243,11 @@ async function getWeeklySubjectData(userId, weekStart, weekEnd) {
 }
 
 // 1日の統計データを取得
-async function getDayStats(userId, date) {
+async function getDayStats(studentEmail, date) {
   const { data, error } = await supabase
     .from('study_records')
     .select('hours, minutes, subject_id')
-    .eq('user_id', userId)
+    .eq('student_email', studentEmail)
     .eq('study_date', date)
 
   if (error) {
@@ -271,11 +271,11 @@ async function getDayStats(userId, date) {
 }
 
 // 期間の統計データを取得
-async function getPeriodStats(userId, startDate, endDate) {
+async function getPeriodStats(studentEmail, startDate, endDate) {
   const { data, error } = await supabase
     .from('study_records')
     .select('hours, minutes, study_date, subject_id')
-    .eq('user_id', userId)
+    .eq('student_email', studentEmail)
     .gte('study_date', startDate)
     .lte('study_date', endDate)
 
@@ -320,7 +320,7 @@ async function getPeriodStats(userId, startDate, endDate) {
 }
 
 // 科目別統計データを取得
-async function getSubjectStats(userId, startDate, endDate) {
+async function getSubjectStats(studentEmail, startDate, endDate) {
   const { data, error } = await supabase
     .from('study_records')
     .select(`
@@ -329,7 +329,7 @@ async function getSubjectStats(userId, startDate, endDate) {
       subject_id,
       subjects(name, color)
     `)
-    .eq('user_id', userId)
+    .eq('student_email', studentEmail)
     .gte('study_date', startDate)
     .lte('study_date', endDate)
 
@@ -362,14 +362,14 @@ async function getSubjectStats(userId, startDate, endDate) {
 }
 
 // 最近の学習記録を取得
-async function getRecentRecords(userId, limit = 5) {
+async function getRecentRecords(studentEmail, limit = 5) {
   const { data, error } = await supabase
     .from('study_records')
     .select(`
       *,
       subjects(name, color)
     `)
-    .eq('user_id', userId)
+    .eq('student_email', studentEmail)
     .order('study_date', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(limit)
@@ -383,12 +383,12 @@ async function getRecentRecords(userId, limit = 5) {
 }
 
 // 学習連続日数を取得
-async function getStudyStreak(userId) {
+async function getStudyStreak(studentEmail) {
   try {
     const { data, error } = await supabase
       .from('study_records')
       .select('study_date')
-      .eq('user_id', userId)
+      .eq('student_email', studentEmail)
       .order('study_date', { ascending: false })
 
     if (error || !data || data.length === 0) {
@@ -421,13 +421,13 @@ async function getStudyStreak(userId) {
 }
 
 // 今後の予定を取得
-async function getUpcomingEvents(userId) {
+async function getUpcomingEvents(studentEmail) {
   const today = new Date().toISOString().split('T')[0]
   
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .eq('user_id', userId)
+    .eq('student_email', studentEmail)
     .gte('date', today)
     .order('date', { ascending: true })
     .limit(5)

@@ -108,10 +108,25 @@ exports.handler = async (event, context) => {
 
 // 目標取得
 async function handleGetGoal(sessionUser, headers) {
+  // まずstudentsテーブルからuser_idを取得
+  const { data: student, error: studentError } = await supabase
+    .from('students')
+    .select('id')
+    .eq('email', sessionUser.email)
+    .single()
+
+  if (studentError || !student) {
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ error: 'Student not found' })
+    }
+  }
+
   const { data: goal, error } = await supabase
     .from('user_goals')
     .select('*')
-    .eq('user_id', sessionUser.id)
+    .eq('user_id', student.id)
     .single()
 
   if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -155,11 +170,26 @@ async function handleUpdateGoal(sessionUser, event, headers) {
     }
   }
 
+  // まずstudentsテーブルからuser_idを取得
+  const { data: student, error: studentError } = await supabase
+    .from('students')
+    .select('id')
+    .eq('email', sessionUser.email)
+    .single()
+
+  if (studentError || !student) {
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ error: 'Student not found' })
+    }
+  }
+
   // 既存の目標があるかチェック
   const { data: existingGoal } = await supabase
     .from('user_goals')
     .select('*')
-    .eq('user_id', sessionUser.id)
+    .eq('user_id', student.id)
     .single()
 
   let result
@@ -171,7 +201,7 @@ async function handleUpdateGoal(sessionUser, event, headers) {
         daily_goal_minutes: goalData.daily_goal_minutes,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', sessionUser.id)
+      .eq('user_id', student.id)
       .select()
 
     result = { data, error }
@@ -180,7 +210,7 @@ async function handleUpdateGoal(sessionUser, event, headers) {
     const { data, error } = await supabase
       .from('user_goals')
       .insert([{
-        user_id: sessionUser.id,
+        user_id: student.id,
         daily_goal_minutes: goalData.daily_goal_minutes,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

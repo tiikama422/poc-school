@@ -115,7 +115,7 @@ async function handleGetEvents(sessionUser, event, headers) {
   const { data: events, error } = await supabase
     .from('events')
     .select('*')
-    .eq('user_id', sessionUser.id)
+    .eq('student_email', sessionUser.email)
     .order('date', { ascending: true })
 
   if (error) {
@@ -162,7 +162,7 @@ async function handleCreateEvent(sessionUser, event, headers) {
   const { data: newEvent, error } = await supabase
     .from('events')
     .insert([{
-      user_id: sessionUser.id,
+      student_email: sessionUser.email,
       title: eventData.title,
       description: eventData.description || '',
       date: eventData.date,
@@ -217,7 +217,7 @@ async function handleUpdateEvent(sessionUser, event, headers) {
       updated_at: new Date().toISOString()
     })
     .eq('id', eventId)
-    .eq('user_id', sessionUser.id)
+    .eq('student_email', sessionUser.email)
     .select()
 
   if (error) {
@@ -255,7 +255,7 @@ async function handleDeleteEvent(sessionUser, event, headers) {
     .from('events')
     .delete()
     .eq('id', eventId)
-    .eq('user_id', sessionUser.id)
+    .eq('student_email', sessionUser.email)
 
   if (error) {
     console.error('Event delete error:', error)
