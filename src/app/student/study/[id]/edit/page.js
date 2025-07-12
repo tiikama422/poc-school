@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth'
 import { safeBase64Encode } from '@/lib/base64'
 import Link from 'next/link'
+import TimePicker from '@/components/TimePicker'
 
 export default function EditStudyRecord() {
   const [formData, setFormData] = useState({
@@ -92,6 +93,10 @@ export default function EditStudyRecord() {
       minutes: preset.minutes 
     }))
   }
+  
+  const handleTimeChange = useCallback((hours, minutes) => {
+    setFormData(prev => ({ ...prev, hours, minutes }))
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -193,38 +198,19 @@ export default function EditStudyRecord() {
               </div>
 
               {/* 学習時間 */}
-              <div>
-                <label className="block text-slate-200 text-sm font-medium mb-2">
+              <div className="col-span-full">
+                <label className="block text-slate-200 text-sm font-medium mb-4">
                   学習時間 *
                 </label>
-                <div className="flex gap-2">
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      min="0"
-                      max="12"
-                      value={formData.hours}
-                      onChange={(e) => setFormData(prev => ({ ...prev, hours: parseInt(e.target.value) || 0 }))}
-                      className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
-                    />
-                    <span className="text-slate-300 ml-2">時間</span>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      step="5"
-                      value={formData.minutes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, minutes: parseInt(e.target.value) || 0 }))}
-                      className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
-                    />
-                    <span className="text-slate-300 ml-2">分</span>
-                  </div>
-                </div>
+                <TimePicker 
+                  hours={formData.hours}
+                  minutes={formData.minutes}
+                  onTimeChange={handleTimeChange}
+                />
                 
                 {/* プリセットボタン */}
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                  <span className="text-slate-400 text-sm mr-2">クイック選択:</span>
                   {timePresets.map((preset, index) => (
                     <button
                       key={index}

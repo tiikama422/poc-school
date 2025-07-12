@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth'
 import { safeBase64Encode } from '@/lib/base64'
 import Link from 'next/link'
+import TimePicker from '@/components/TimePicker'
 
 export default function NewStudyRecord() {
   const [formData, setFormData] = useState({
@@ -80,6 +81,10 @@ export default function NewStudyRecord() {
   const handleSubSubjectSelect = (subSubjectId) => {
     setFormData(prev => ({ ...prev, sub_subject_id: subSubjectId }))
   }
+  
+  const handleTimeChange = useCallback((hours, minutes) => {
+    setFormData(prev => ({ ...prev, hours, minutes }))
+  }, [])
 
 
   const handleSubmit = async (e) => {
@@ -174,41 +179,15 @@ export default function NewStudyRecord() {
               </div>
 
               {/* 学習時間 */}
-              <div>
-                <label className="block text-slate-200 text-sm font-medium mb-2">
+              <div className="col-span-full">
+                <label className="block text-slate-200 text-sm font-medium mb-4">
                   学習時間 *
                 </label>
-                <div className="flex gap-2">
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      min="0"
-                      max="12"
-                      value={formData.hours}
-                      onChange={(e) => setFormData(prev => ({ ...prev, hours: parseInt(e.target.value) || 0 }))}
-                      className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
-                      placeholder="0"
-                    />
-                    <span className="text-slate-300 ml-2">時間</span>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      step="1"
-                      value={formData.minutes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, minutes: parseInt(e.target.value) || 0 }))}
-                      className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
-                      placeholder="0"
-                    />
-                    <span className="text-slate-300 ml-2">分</span>
-                  </div>
-                </div>
-                
-                <div className="text-slate-400 text-sm mt-2">
-                  例：1時間30分 → 1時間30分、45分 → 0時間45分
-                </div>
+                <TimePicker 
+                  hours={formData.hours}
+                  minutes={formData.minutes}
+                  onTimeChange={handleTimeChange}
+                />
               </div>
             </div>
           </div>
