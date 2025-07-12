@@ -113,7 +113,7 @@ export default function NewStudyRecord() {
       }
 
       // APIエンドポイントに送信
-      const response = await fetch('/.netlify/functions/study-records', {
+      const response = await fetch('/api/study-records', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

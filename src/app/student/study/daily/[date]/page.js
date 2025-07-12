@@ -39,7 +39,7 @@ export default function DailyStudyDetail() {
 
   const loadDailyData = async (user, date) => {
     try {
-      const response = await fetch(`/.netlify/functions/study-daily?date=${date}`, {
+      const response = await fetch(`/api/study-daily?date=${date}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
@@ -107,7 +107,7 @@ export default function DailyStudyDetail() {
     }
 
     try {
-      const response = await fetch(`/.netlify/functions/study-records/${recordId}`, {
+      const response = await fetch(`/api/study-records/${recordId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`

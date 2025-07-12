@@ -46,7 +46,7 @@ export default function EditStudyRecord() {
       }
 
       try {
-        const response = await fetch(`/.netlify/functions/study-records/${params.id}`, {
+        const response = await fetch(`/api/study-records/${params.id}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
@@ -124,7 +124,7 @@ export default function EditStudyRecord() {
       }
 
       // APIエンドポイントに送信
-      const response = await fetch(`/.netlify/functions/study-records/${params.id}`, {
+      const response = await fetch(`/api/study-records/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

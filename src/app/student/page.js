@@ -39,7 +39,7 @@ export default function StudentDashboard() {
 
   const loadStats = async (user) => {
     try {
-      const response = await fetch('/.netlify/functions/study-stats', {
+      const response = await fetch('/api/study-stats', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
