@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { getSessionUser, clearSessionUser } from '@/lib/auth'
 import { safeBase64Encode } from '@/lib/base64'
 import Link from 'next/link'
+import CircularProgress from '@/components/CircularProgress'
+import WeeklyChart from '@/components/WeeklyChart'
+import SubjectPieChart from '@/components/SubjectPieChart'
 
 export default function StudentDashboard() {
   const [user, setUser] = useState(null)
@@ -69,6 +72,59 @@ export default function StudentDashboard() {
         <div className="text-xl text-white">Loading...</div>
       </div>
     )
+  }
+
+  // Helper functions
+  const formatTime = (minutes) => {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    if (hours > 0 && mins > 0) {
+      return `${hours}時間${mins}分`
+    } else if (hours > 0) {
+      return `${hours}時間`
+    } else {
+      return `${mins}分`
+    }
+  }
+  
+  const calculateGoalPercentage = (currentMinutes, goalMinutes) => {
+    return goalMinutes > 0 ? Math.min((currentMinutes / goalMinutes) * 100, 100) : 0
+  }
+  
+  const renderTimeComparison = (todayMinutes, yesterdayMinutes) => {
+    const diff = todayMinutes - yesterdayMinutes
+    if (diff > 0) {
+      return (
+        <div className="flex items-center text-green-400">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+          </svg>
+          <span>+{diff}分</span>
+        </div>
+      )
+    } else if (diff < 0) {
+      return (
+        <div className="flex items-center text-red-400">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+          </svg>
+          <span>{diff}分</span>
+        </div>
+      )
+    } else {
+      return <span className="text-slate-400">同じ</span>
+    }
+  }
+  
+  const getSubjectIcon = (subjectName) => {
+    const icons = {
+      '国語': '📖',
+      '数学': '📊', 
+      '英語': '🌍',
+      '理科': '🔬',
+      '社会': '🏛️'
+    }
+    return icons[subjectName] || '📝'
   }
 
   return (
@@ -139,35 +195,95 @@ export default function StudentDashboard() {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Recent Records & Stats */}
+          {/* Left Column - Enhanced Dashboard */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Today's Summary */}
+            {/* Enhanced Today's Summary */}
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
               <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📊</span>
+                <span className="mr-3 text-2xl">🎯</span>
                 今日の学習サマリー
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-400">
-                    {stats?.today?.totalHours || 0}
-                    {stats?.today?.totalMinutes > 0 && (
-                      <span className="text-xl">.{Math.floor(stats.today.totalMinutes / 6)}</span>
-                    )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Goal Achievement Circle */}
+                <div className="flex flex-col items-center">
+                  <CircularProgress 
+                    percentage={calculateGoalPercentage(stats?.today?.totalMinutes || 0, stats?.dailyGoalMinutes || 120)}
+                    size={100}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-white">
+                        {Math.round(calculateGoalPercentage(stats?.today?.totalMinutes || 0, stats?.dailyGoalMinutes || 120))}%
+                      </div>
+                      <div className="text-xs text-slate-400">達成</div>
+                    </div>
+                  </CircularProgress>
+                  <div className="mt-2 text-center">
+                    <div className="text-sm text-slate-300">
+                      目標まで{' '}
+                      <span className="text-blue-400 font-medium">
+                        {Math.max(0, (stats?.dailyGoalMinutes || 120) - (stats?.today?.totalMinutes || 0))}分
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-slate-400 text-sm">時間</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-400">{stats?.today?.recordCount || 0}</div>
-                  <div className="text-slate-400 text-sm">記録数</div>
+                
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-black/20 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-400">
+                      {formatTime(stats?.today?.totalMinutes || 0)}
+                    </div>
+                    <div className="text-slate-400 text-sm">今日の学習</div>
+                  </div>
+                  <div className="text-center p-3 bg-black/20 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-400">{stats?.streakDays || 0}</div>
+                    <div className="text-slate-400 text-sm">連続学習</div>
+                  </div>
+                  <div className="text-center p-3 bg-black/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-400">{stats?.today?.recordCount || 0}</div>
+                    <div className="text-slate-400 text-sm">記録数</div>
+                  </div>
+                  <div className="text-center p-3 bg-black/20 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-400">{stats?.today?.subjectCount || 0}</div>
+                    <div className="text-slate-400 text-sm">科目数</div>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-400">{stats?.today?.subjectCount || 0}</div>
-                  <div className="text-slate-400 text-sm">科目数</div>
+              </div>
+              
+              {/* Yesterday Comparison */}
+              {stats?.yesterday && (
+                <div className="border-t border-white/10 pt-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-400">昨日との比較</span>
+                    <div className="flex items-center gap-2">
+                      {renderTimeComparison(stats.today?.totalMinutes || 0, stats.yesterday?.totalMinutes || 0)}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-400">{stats?.streakDays || 0}</div>
-                  <div className="text-slate-400 text-sm">連続日数</div>
+              )}
+            </div>
+            
+            {/* Weekly Learning Snapshot */}
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-white flex items-center">
+                  <span className="mr-3 text-2xl">📊</span>
+                  学習スナップショット
+                </h2>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Weekly Bar Chart */}
+                <div>
+                  <h3 className="text-sm font-medium text-slate-300 mb-3">週間学習時間</h3>
+                  <WeeklyChart weeklyData={stats?.weeklyData || []} />
+                </div>
+                
+                {/* Subject Balance Pie Chart */}
+                <div>
+                  <h3 className="text-sm font-medium text-slate-300 mb-3">今週の科目バランス</h3>
+                  <SubjectPieChart subjects={stats?.weeklySubjects || []} />
                 </div>
               </div>
             </div>
@@ -189,23 +305,18 @@ export default function StudentDashboard() {
               <div className="space-y-4">
                 {stats?.recentRecords && stats.recentRecords.length > 0 ? (
                   stats.recentRecords.map((record) => (
-                    <div key={record.id} className="flex items-center justify-between p-4 bg-black/20 rounded-lg">
+                    <div key={record.id} className="flex items-center justify-between p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
                       <div className="flex items-center space-x-3">
                         <div 
                           className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
                           style={{ backgroundColor: `${record.subjects?.color || '#95A5A6'}20` }}
                         >
-                          {record.subjects?.name === '国語' ? '📖' : 
-                           record.subjects?.name === '数学' ? '📊' : 
-                           record.subjects?.name === '英語' ? '🌍' : 
-                           record.subjects?.name === '理科' ? '🔬' : 
-                           record.subjects?.name === '社会' ? '🏛️' : '📝'}
+                          {getSubjectIcon(record.subjects?.name)}
                         </div>
                         <div>
                           <div className="text-white font-medium">{record.subjects?.name}</div>
                           <div className="text-slate-400 text-sm">
-                            {record.hours > 0 && `${record.hours}時間`}
-                            {record.minutes > 0 && `${record.minutes}分`}
+                            {formatTime((record.hours || 0) * 60 + (record.minutes || 0))}
                           </div>
                         </div>
                       </div>
@@ -236,8 +347,47 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          {/* Right Column - Quick Actions & Stats */}
+          {/* Right Column - Enhanced Stats & Schedule */}
           <div className="space-y-6">
+            
+            {/* Upcoming Events */}
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
+                <span className="mr-3 text-2xl">📅</span>
+                今後の予定
+              </h2>
+              <div className="space-y-3">
+                {stats?.upcomingEvents && stats.upcomingEvents.length > 0 ? (
+                  stats.upcomingEvents.slice(0, 2).map((event, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
+                      <div>
+                        <div className="text-white font-medium">{event.title}</div>
+                        <div className="text-slate-400 text-sm">{event.type}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-blue-400 text-sm font-medium">
+                          {new Date(event.date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })}
+                        </div>
+                        <div className="text-slate-400 text-xs">
+                          あと{Math.ceil((new Date(event.date) - new Date()) / (1000 * 60 * 60 * 24))}日
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-slate-400">
+                    <div className="text-2xl mb-2">📝</div>
+                    <div className="text-sm">予定はありません</div>
+                  </div>
+                )}
+                <Link 
+                  href="/student/calendar"
+                  className="block text-center text-blue-400 hover:text-blue-300 text-sm font-medium mt-4"
+                >
+                  カレンダーで予定を確認する →
+                </Link>
+              </div>
+            </div>
 
             {/* Subject Overview */}
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
@@ -257,8 +407,7 @@ export default function StudentDashboard() {
                         <span className="text-slate-300">{subject.name}</span>
                       </div>
                       <span className="text-white">
-                        {subject.totalHours}時間
-                        {subject.displayMinutes > 0 && `${subject.displayMinutes}分`}
+                        {formatTime((subject.totalHours || 0) * 60 + (subject.displayMinutes || 0))}
                       </span>
                     </div>
                   ))
@@ -285,29 +434,32 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            {/* Schedule */}
+            {/* Learning Motivation */}
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
               <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📅</span>
-                今週のスケジュール
+                <span className="mr-3 text-2xl">🏆</span>
+                学習の記録
               </h2>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">月曜日</span>
-                  <span className="text-white">数学・英語</span>
+              <div className="space-y-4">
+                <div className="text-center p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-500/20">
+                  <div className="text-2xl mb-2">🔥</div>
+                  <div className="text-lg font-bold text-white">{stats?.streakDays || 0}日連続</div>
+                  <div className="text-sm text-slate-300">学習記録継続中！</div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">火曜日</span>
-                  <span className="text-white">物理・化学</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">水曜日</span>
-                  <span className="text-white">国語・社会</span>
-                </div>
-                <div className="flex justify-between text-sm bg-blue-500/10 p-2 rounded">
-                  <span className="text-blue-400">今日</span>
-                  <span className="text-blue-400">数学・英語・物理</span>
-                </div>
+                
+                {stats?.achievements && stats.achievements.length > 0 && (
+                  <div>
+                    <div className="text-sm font-medium text-slate-300 mb-2">最近の達成</div>
+                    <div className="space-y-2">
+                      {stats.achievements.slice(0, 3).map((achievement, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm">
+                          <span className="text-yellow-400">🏅</span>
+                          <span className="text-slate-300">{achievement.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

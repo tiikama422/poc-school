@@ -111,7 +111,7 @@ exports.handler = async (event, context) => {
           color
         )
       `)
-      .eq('student_email', sessionUser.email)
+      .eq('user_id', sessionUser.id)
       .eq('study_date', dateString)
       .order('created_at', { ascending: true })
 

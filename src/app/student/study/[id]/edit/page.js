@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getSessionUser } from '@/lib/auth'
 import { safeBase64Encode } from '@/lib/base64'
 import Link from 'next/link'
+import TimePicker from '@/components/TimePicker'
 
 export default function EditStudyRecord() {
   const [formData, setFormData] = useState({
@@ -45,7 +46,7 @@ export default function EditStudyRecord() {
       }
 
       try {
-        const response = await fetch(`/.netlify/functions/study-records/${params.id}`, {
+        const response = await fetch(`/api/study-records/${params.id}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${safeBase64Encode(JSON.stringify(user))}`
@@ -92,6 +93,10 @@ export default function EditStudyRecord() {
       minutes: preset.minutes 
     }))
   }
+  
+  const handleTimeChange = useCallback((hours, minutes) => {
+    setFormData(prev => ({ ...prev, hours, minutes }))
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -119,7 +124,7 @@ export default function EditStudyRecord() {
       }
 
       // APIエンドポイントに送信
-      const response = await fetch(`/.netlify/functions/study-records/${params.id}`, {
+      const response = await fetch(`/api/study-records/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -197,44 +202,32 @@ export default function EditStudyRecord() {
                 <label className="block text-slate-200 text-sm font-medium mb-2">
                   学習時間 *
                 </label>
-                <div className="flex gap-2">
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      min="0"
-                      max="12"
-                      value={formData.hours}
-                      onChange={(e) => setFormData(prev => ({ ...prev, hours: parseInt(e.target.value) || 0 }))}
-                      className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
-                    />
-                    <span className="text-slate-300 ml-2">時間</span>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      step="5"
-                      value={formData.minutes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, minutes: parseInt(e.target.value) || 0 }))}
-                      className="w-20 px-3 py-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:border-white/30 focus:outline-none transition-all duration-300"
-                    />
-                    <span className="text-slate-300 ml-2">分</span>
+                <div className="flex items-start gap-4">
+                  <TimePicker 
+                    hours={formData.hours}
+                    minutes={formData.minutes}
+                    onTimeChange={handleTimeChange}
+                  />
+                  
+                  {/* プリセットボタン */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-slate-400 text-xs">クイック選択:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {timePresets.map((preset, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleTimePreset(preset)}
+                          className="px-2 py-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-xs rounded transition-colors"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                
-                {/* プリセットボタン */}
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {timePresets.map((preset, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleTimePreset(preset)}
-                      className="px-3 py-1 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-sm rounded-lg transition-colors"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+                <div className="text-slate-400 text-xs mt-2">
+                  スクロールまたはクリックで選択
                 </div>
               </div>
             </div>

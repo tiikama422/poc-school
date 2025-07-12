@@ -1,5 +1,5 @@
-const { createClient } = require('@supabase/supabase-js')
-const { safeBase64Decode } = require('./lib/base64')
+import { createClient } from '@supabase/supabase-js'
+import { safeBase64Decode } from '@/lib/base64'
 
 // Supabaseクライアントの初期化
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -7,40 +7,12 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-exports.handler = async (event, context) => {
-  // CORS設定
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS'
-  }
-
-  // プリフライトリクエスト対応
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: ''
-    }
-  }
-
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
-    }
-  }
-
+export async function GET(request) {
   try {
     // 認証チェック
-    const authHeader = event.headers.authorization || event.headers.Authorization
+    const authHeader = request.headers.get('authorization')
     if (!authHeader) {
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: 'Authorization header is required' })
-      }
+      return Response.json({ error: 'Authorization header is required' }, { status: 401 })
     }
 
     // セッションユーザーの取得
@@ -49,40 +21,24 @@ exports.handler = async (event, context) => {
       const token = authHeader.replace('Bearer ', '')
       sessionUser = JSON.parse(safeBase64Decode(token))
     } catch (error) {
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: 'Invalid token' })
-      }
+      return Response.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     // 学生権限チェック
     if (!sessionUser || sessionUser.userType !== 'student') {
-      return {
-        statusCode: 403,
-        headers,
-        body: JSON.stringify({ error: 'Student access required' })
-      }
+      return Response.json({ error: 'Student access required' }, { status: 403 })
     }
 
     // 統計データの取得
     const stats = await getStudyStats(sessionUser.email)
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ 
-        success: true, 
-        data: stats
-      })
-    }
+    return Response.json({ 
+      success: true, 
+      data: stats
+    })
   } catch (error) {
     console.error('Study stats API error:', error)
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'Internal server error' })
-    }
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -242,18 +198,25 @@ async function getDayStats(studentEmail, date) {
     return { totalHours: 0, totalMinutes: 0, recordCount: 0, subjectCount: 0 }
   }
 
-  const totalMinutes = data.reduce((sum, record) => 
-    sum + (record.hours * 60) + record.minutes, 0
-  )
-  const totalHours = Math.floor(totalMinutes / 60)
-  const remainingMinutes = totalMinutes % 60
-  const subjectCount = new Set(data.map(r => r.subject_id)).size
+  if (!data || data.length === 0) {
+    return { totalHours: 0, totalMinutes: 0, recordCount: 0, subjectCount: 0 }
+  }
+
+  let totalMinutes = 0
+  const subjects = new Set()
+
+  data.forEach(record => {
+    totalMinutes += (record.hours || 0) * 60 + (record.minutes || 0)
+    if (record.subject_id) {
+      subjects.add(record.subject_id)
+    }
+  })
 
   return {
-    totalHours,
-    totalMinutes: remainingMinutes,
+    totalHours: Math.floor(totalMinutes / 60),
+    totalMinutes: totalMinutes % 60,
     recordCount: data.length,
-    subjectCount
+    subjectCount: subjects.size
   }
 }
 
@@ -271,23 +234,25 @@ async function getPeriodStats(studentEmail, startDate, endDate) {
     return { totalHours: 0, totalMinutes: 0, recordCount: 0, studyDays: 0, mostStudiedSubject: null }
   }
 
-  const totalMinutes = data.reduce((sum, record) => 
-    sum + (record.hours * 60) + record.minutes, 0
-  )
-  const totalHours = Math.floor(totalMinutes / 60)
-  const remainingMinutes = totalMinutes % 60
-  const studyDays = new Set(data.map(r => r.study_date)).size
+  if (!data || data.length === 0) {
+    return { totalHours: 0, totalMinutes: 0, recordCount: 0, studyDays: 0, mostStudiedSubject: null }
+  }
 
-  // 最も学習した科目
+  let totalMinutes = 0
+  const studyDates = new Set()
   const subjectMinutes = {}
+
   data.forEach(record => {
-    const subjectId = record.subject_id
-    if (!subjectMinutes[subjectId]) {
-      subjectMinutes[subjectId] = 0
+    const minutes = (record.hours || 0) * 60 + (record.minutes || 0)
+    totalMinutes += minutes
+    studyDates.add(record.study_date)
+    
+    if (record.subject_id) {
+      subjectMinutes[record.subject_id] = (subjectMinutes[record.subject_id] || 0) + minutes
     }
-    subjectMinutes[subjectId] += (record.hours * 60) + record.minutes
   })
 
+  // 最も学習した科目を取得
   let mostStudiedSubject = null
   let maxMinutes = 0
   for (const [subjectId, minutes] of Object.entries(subjectMinutes)) {
@@ -298,54 +263,59 @@ async function getPeriodStats(studentEmail, startDate, endDate) {
   }
 
   return {
-    totalHours,
-    totalMinutes: remainingMinutes,
+    totalHours: Math.floor(totalMinutes / 60),
+    totalMinutes: totalMinutes % 60,
     recordCount: data.length,
-    studyDays,
+    studyDays: studyDates.size,
     mostStudiedSubject
   }
 }
 
-// 科目別統計データを取得
+// 科目別統計を取得
 async function getSubjectStats(studentEmail, startDate, endDate) {
   const { data, error } = await supabase
     .from('study_records')
     .select(`
       hours, 
       minutes, 
-      subject_id,
-      subjects(name, color)
+      subjects (
+        id,
+        name,
+        color
+      )
     `)
     .eq('student_email', studentEmail)
     .gte('study_date', startDate)
     .lte('study_date', endDate)
 
-  if (error) {
-    console.error('Database error:', error)
+  if (error || !data) {
     return []
   }
 
-  const subjectStats = {}
+  const subjectData = {}
+  
   data.forEach(record => {
-    const subjectId = record.subject_id
-    if (!subjectStats[subjectId]) {
-      subjectStats[subjectId] = {
-        id: subjectId,
-        name: record.subjects?.name || '未知の科目',
-        color: record.subjects?.color || '#95A5A6',
-        totalMinutes: 0,
-        recordCount: 0
+    const subject = record.subjects
+    if (!subject) return
+    
+    const minutes = (record.hours || 0) * 60 + (record.minutes || 0)
+    
+    if (!subjectData[subject.id]) {
+      subjectData[subject.id] = {
+        id: subject.id,
+        name: subject.name,
+        color: subject.color,
+        totalHours: 0,
+        displayMinutes: 0
       }
     }
-    subjectStats[subjectId].totalMinutes += (record.hours * 60) + record.minutes
-    subjectStats[subjectId].recordCount++
+    
+    const totalMinutes = subjectData[subject.id].totalHours * 60 + subjectData[subject.id].displayMinutes + minutes
+    subjectData[subject.id].totalHours = Math.floor(totalMinutes / 60)
+    subjectData[subject.id].displayMinutes = totalMinutes % 60
   })
-
-  return Object.values(subjectStats).map(subject => ({
-    ...subject,
-    totalHours: Math.floor(subject.totalMinutes / 60),
-    displayMinutes: subject.totalMinutes % 60
-  })).sort((a, b) => b.totalMinutes - a.totalMinutes)
+  
+  return Object.values(subjectData)
 }
 
 // 最近の学習記録を取得
@@ -353,8 +323,16 @@ async function getRecentRecords(studentEmail, limit = 5) {
   const { data, error } = await supabase
     .from('study_records')
     .select(`
-      *,
-      subjects(name, color)
+      id,
+      study_date,
+      hours,
+      minutes,
+      memo,
+      subjects (
+        id,
+        name,
+        color
+      )
     `)
     .eq('student_email', studentEmail)
     .order('study_date', { ascending: false })
@@ -362,7 +340,7 @@ async function getRecentRecords(studentEmail, limit = 5) {
     .limit(limit)
 
   if (error) {
-    console.error('Database error:', error)
+    console.error('Recent records error:', error)
     return []
   }
 
@@ -371,38 +349,47 @@ async function getRecentRecords(studentEmail, limit = 5) {
 
 // 学習連続日数を取得
 async function getStudyStreak(studentEmail) {
-  try {
-    const { data, error } = await supabase
-      .from('study_records')
-      .select('study_date')
-      .eq('student_email', studentEmail)
-      .order('study_date', { ascending: false })
+  const { data, error } = await supabase
+    .from('study_records')
+    .select('study_date')
+    .eq('student_email', studentEmail)
+    .order('study_date', { ascending: false })
 
-    if (error || !data || data.length === 0) {
-      return 0
-    }
-
-    const uniqueDates = [...new Set(data.map(r => r.study_date))].sort((a, b) => b.localeCompare(a))
-    
-    let streak = 0
-    let currentDate = new Date()
-    
-    for (const dateStr of uniqueDates) {
-      const recordDate = new Date(dateStr)
-      const diffTime = currentDate.getTime() - recordDate.getTime()
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      
-      if (diffDays === streak || (streak === 0 && diffDays <= 1)) {
-        streak++
-        currentDate = recordDate
-      } else {
-        break
-      }
-    }
-
-    return streak
-  } catch (error) {
-    console.error('Get study streak error:', error)
+  if (error || !data) {
     return 0
   }
+
+  // 日付ごとにグループ化
+  const studyDates = [...new Set(data.map(record => record.study_date))].sort().reverse()
+  
+  if (studyDates.length === 0) {
+    return 0
+  }
+
+  let streak = 0
+  const today = new Date().toISOString().split('T')[0]
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  const yesterdayStr = yesterday.toISOString().split('T')[0]
+
+  // 今日または昨日から開始
+  let startDate = studyDates[0] === today ? today : (studyDates[0] === yesterdayStr ? yesterdayStr : null)
+  
+  if (!startDate) {
+    return 0
+  }
+
+  // 連続日数をカウント
+  let currentDate = new Date(startDate)
+  for (const studyDate of studyDates) {
+    const expectedDate = currentDate.toISOString().split('T')[0]
+    if (studyDate === expectedDate) {
+      streak++
+      currentDate.setDate(currentDate.getDate() - 1)
+    } else {
+      break
+    }
+  }
+
+  return streak
 }
