@@ -89,17 +89,17 @@ export default function SubjectPieChart({ subjects = [] }) {
       </div>
 
       {/* Legend */}
-      <div className="flex-1 space-y-2">
+      <div className="flex-1 space-y-2 px-2">
         {segments.map((segment, index) => (
           <div key={index} className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <div 
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: segment.color }}
               />
               <span className="text-slate-300">{segment.name}</span>
             </div>
-            <div className="text-right">
+            <div className="text-right ml-4">
               <div className="text-white font-medium">
                 {formatTime(segment.totalMinutes)}
               </div>
