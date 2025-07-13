@@ -41,6 +41,29 @@ export default function StudentDashboard() {
     checkSession()
   }, [router])
 
+  // ページフォーカス時にデータを再取得（リアルタイム更新）
+  useEffect(() => {
+    const handleFocus = async () => {
+      if (user) {
+        await loadStats(user)
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    
+    // ページ表示時もデータ更新
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && user) {
+        loadStats(user)
+      }
+    })
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleFocus)
+    }
+  }, [user])
+
   const loadStats = async (user) => {
     try {
       if (!user) {

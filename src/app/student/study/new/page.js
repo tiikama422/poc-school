@@ -129,8 +129,8 @@ export default function NewStudyRecord() {
         return
       }
 
-      // 成功時の処理
-      router.push('/student/study')
+      // 成功時の処理 - ダッシュボードに戻って統計を更新
+      router.push('/student')
     } catch (error) {
       console.error('Submit error:', error)
       setError('保存中にエラーが発生しました')
