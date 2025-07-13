@@ -85,9 +85,9 @@ export default function StudyRecords() {
       return '昨日'
     } else {
       return date.toLocaleDateString('ja-JP', { 
-        month: '1月', 
-        day: '1日' 
-      })
+        month: 'numeric', 
+        day: 'numeric' 
+      }) + '日'
     }
   }
 
@@ -150,7 +150,7 @@ export default function StudyRecords() {
               href="/student"
               className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm whitespace-nowrap"
             >
-              ダッシュボード
+              戻る
             </Link>
           </div>
         </div>

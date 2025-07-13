@@ -149,7 +149,7 @@ export default function NewStudyRecord() {
             href="/student"
             className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm whitespace-nowrap"
           >
-            ダッシュボード
+            戻る
           </Link>
         </div>
 
