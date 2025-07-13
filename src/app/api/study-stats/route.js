@@ -222,7 +222,7 @@ async function getDayStats(studentEmail, date) {
 
   return {
     totalHours: Math.floor(totalMinutes / 60),
-    totalMinutes: totalMinutes % 60,
+    totalMinutes,
     recordCount: data.length,
     subjectCount: subjects.size
   }
@@ -272,7 +272,7 @@ async function getPeriodStats(studentEmail, startDate, endDate) {
 
   return {
     totalHours: Math.floor(totalMinutes / 60),
-    totalMinutes: totalMinutes % 60,
+    totalMinutes,
     recordCount: data.length,
     studyDays: studyDates.size,
     mostStudiedSubject
