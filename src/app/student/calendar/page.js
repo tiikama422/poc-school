@@ -107,7 +107,8 @@ export default function StudyCalendar() {
     // 当月の日付
     for (let i = 1; i <= daysInMonth; i++) {
       const currentDate = new Date(year, month, i)
-      const dateString = currentDate.toISOString().split('T')[0]
+      // タイムゾーン問題を回避するため、ローカル日付文字列を使用
+      const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`
       const dayEvents = events.filter(event => event.date === dateString)
       
       days.push({
@@ -141,7 +142,10 @@ export default function StudyCalendar() {
 
   const handleDateClick = (day) => {
     if (day.isCurrentMonth) {
-      const dateString = day.date.toISOString().split('T')[0]
+      const year = day.date.getFullYear()
+      const month = day.date.getMonth() + 1
+      const dayNum = day.date.getDate()
+      const dateString = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
       setModalDate(day.date)
       setCurrentMemo(memos[dateString] || '')
       setIsEditing(!!memos[dateString])
@@ -152,7 +156,10 @@ export default function StudyCalendar() {
   const handleSaveMemo = async () => {
     if (!modalDate) return
     
-    const dateString = modalDate.toISOString().split('T')[0]
+    const year = modalDate.getFullYear()
+    const month = modalDate.getMonth() + 1
+    const day = modalDate.getDate()
+    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     
     if (currentMemo.trim()) {
       // メモを保存
@@ -175,7 +182,10 @@ export default function StudyCalendar() {
     if (!modalDate) return
     
     if (confirm('このメモを削除しますか？')) {
-      const dateString = modalDate.toISOString().split('T')[0]
+      const year = modalDate.getFullYear()
+      const month = modalDate.getMonth() + 1
+      const day = modalDate.getDate()
+      const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
       setMemos(prev => {
         const newMemos = { ...prev }
         delete newMemos[dateString]
@@ -402,7 +412,13 @@ export default function StudyCalendar() {
                           <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
                         )}
                         {/* Memo indicator */}
-                        {memos[day.date.toISOString().split('T')[0]] && (
+                        {(() => {
+                          const year = day.date.getFullYear()
+                          const month = day.date.getMonth() + 1
+                          const dayNum = day.date.getDate()
+                          const dateString = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
+                          return memos[dateString]
+                        })() && (
                           <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                         )}
                       </div>
@@ -513,9 +529,13 @@ export default function StudyCalendar() {
                 <button 
                   onClick={() => {
                     const today = new Date()
+                    const year = today.getFullYear()
+                    const month = today.getMonth() + 1
+                    const day = today.getDate()
+                    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
                     setModalDate(today)
-                    setCurrentMemo(memos[today.toISOString().split('T')[0]] || '')
-                    setIsEditing(!!memos[today.toISOString().split('T')[0]])
+                    setCurrentMemo(memos[dateString] || '')
+                    setIsEditing(!!memos[dateString])
                     setShowModal(true)
                   }}
                   className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white px-3 py-2.5 rounded-xl font-medium hover:from-purple-500 hover:to-purple-400 transition-all duration-300 text-sm"
@@ -545,8 +565,12 @@ export default function StudyCalendar() {
               </h3>
               
               {(() => {
-                const today = new Date().toISOString().split('T')[0]
-                const todayMemo = memos[today]
+                const today = new Date()
+                const year = today.getFullYear()
+                const month = today.getMonth() + 1
+                const day = today.getDate()
+                const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                const todayMemo = memos[dateString]
                 return todayMemo ? (
                   <div className="p-3 bg-black/20 rounded-lg">
                     <div className="text-white text-sm">{todayMemo}</div>
@@ -622,23 +646,29 @@ export default function StudyCalendar() {
                 </div>
 
                 {/* Events for this date */}
-                {events.filter(event => event.date === modalDate.toISOString().split('T')[0]).length > 0 && (
-                  <div className="mb-4">
-                    <label className="block text-slate-300 text-sm font-medium mb-2">
-                      この日の予定
-                    </label>
-                    <div className="space-y-2">
-                      {events
-                        .filter(event => event.date === modalDate.toISOString().split('T')[0])
-                        .map((event) => (
-                        <div key={event.id} className="p-2 bg-black/20 rounded-lg">
-                          <div className="text-white text-sm font-medium">{event.title}</div>
-                          <div className="text-slate-400 text-xs">{event.description}</div>
-                        </div>
-                      ))}
+                {(() => {
+                  const year = modalDate.getFullYear()
+                  const month = modalDate.getMonth() + 1
+                  const day = modalDate.getDate()
+                  const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                  const dayEvents = events.filter(event => event.date === dateString)
+                  
+                  return dayEvents.length > 0 && (
+                    <div className="mb-4">
+                      <label className="block text-slate-300 text-sm font-medium mb-2">
+                        この日の予定
+                      </label>
+                      <div className="space-y-2">
+                        {dayEvents.map((event) => (
+                          <div key={event.id} className="p-2 bg-black/20 rounded-lg">
+                            <div className="text-white text-sm font-medium">{event.title}</div>
+                            <div className="text-slate-400 text-xs">{event.description}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )
+                })()}
               </div>
 
               {/* Modal Footer */}

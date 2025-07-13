@@ -38,19 +38,30 @@ export default function EventModal({
       })
     } else if (selectedDate) {
       // 新規作成モード（日付指定）
+      const year = selectedDate.getFullYear()
+      const month = selectedDate.getMonth() + 1
+      const day = selectedDate.getDate()
+      const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      
       setFormData({
         title: '',
         description: '',
-        date: selectedDate.toISOString().split('T')[0],
+        date: dateString,
         type: 'テスト',
         color: '#3498DB'
       })
     } else {
       // 新規作成モード（日付未指定）
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = today.getMonth() + 1
+      const day = today.getDate()
+      const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      
       setFormData({
         title: '',
         description: '',
-        date: new Date().toISOString().split('T')[0],
+        date: dateString,
         type: 'テスト',
         color: '#3498DB'
       })
