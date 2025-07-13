@@ -56,6 +56,19 @@ exports.handler = async (event, context) => {
     }
 
     if (authData.user) {
+      // ユーザープロファイル情報を取得
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single()
+
+      if (profileError) {
+        console.error('Profile fetch error:', profileError)
+      }
+
+      const userProfile = profile || {}
+
       return {
         statusCode: 200,
         headers,
@@ -64,12 +77,12 @@ exports.handler = async (event, context) => {
           user: {
             id: authData.user.id,
             email: authData.user.email,
-            fullName: authData.user.user_metadata?.full_name || '',
-            userType: 'student', // デフォルトで学生
-            isAdmin: false,
-            grade: null,
-            className: null,
-            studentNumber: null
+            fullName: userProfile.full_name || userProfile.name || authData.user.user_metadata?.full_name || '',
+            userType: userProfile.user_type || userProfile.role || 'student',
+            isAdmin: userProfile.is_admin || false,
+            grade: userProfile.grade || null,
+            className: userProfile.class_name || null,
+            studentNumber: userProfile.student_number || null
           }
         })
       }
