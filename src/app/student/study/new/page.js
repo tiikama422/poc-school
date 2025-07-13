@@ -141,28 +141,28 @@ export default function NewStudyRecord() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-3xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-light text-white tracking-wide">学習記録を追加</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-wide">学習記録を追加</h1>
           <Link
             href="/student"
-            className="text-slate-300 hover:text-white transition-colors font-medium"
+            className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm"
           >
-            ← ダッシュボードに戻る
+ダッシュボードに戻る
           </Link>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Step 1: 学習日と学習時間 */}
-          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-              <span className="mr-3 text-2xl">📅</span>
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5 lg:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-5 flex items-center">
+              <span className="mr-2 text-lg sm:text-xl">📅</span>
               学習日・時間
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {/* 学習日 */}
               <div>
                 <label className="block text-slate-200 text-sm font-medium mb-2">
@@ -182,7 +182,7 @@ export default function NewStudyRecord() {
                 <label className="block text-slate-200 text-sm font-medium mb-2">
                   学習時間 *
                 </label>
-                <div className="flex justify-start">
+                <div className="w-full">
                   <TimePicker 
                     hours={formData.hours}
                     minutes={formData.minutes}
@@ -203,22 +203,22 @@ export default function NewStudyRecord() {
               教科選択 *
             </h2>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {subjects.map((subject) => (
                 <button
                   key={subject.id}
                   type="button"
                   onClick={() => handleSubjectSelect(subject.id)}
-                  className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                  className={`p-3 rounded-xl border-2 transition-all duration-300 text-center ${
                     formData.subject_id === subject.id
                       ? 'border-white bg-white/10 transform scale-105'
                       : 'border-white/20 hover:border-white/40 hover:bg-white/5'
                   }`}
                   style={{ borderColor: formData.subject_id === subject.id ? subject.color : undefined }}
                 >
-                  <div className="text-2xl mb-2">{subject.icon}</div>
+                  <div className="text-lg mb-1">{subject.icon}</div>
                   <div 
-                    className="font-medium"
+                    className="font-medium text-sm"
                     style={{ color: subject.color }}
                   >
                     {subject.name}
@@ -233,13 +233,13 @@ export default function NewStudyRecord() {
                 <h3 className="text-lg font-medium text-white mb-4">
                   サブカテゴリ選択（任意）
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {subSubjects[formData.subject_id].map((subSubject) => (
                     <button
                       key={subSubject.id}
                       type="button"
                       onClick={() => handleSubSubjectSelect(subSubject.id)}
-                      className={`p-3 rounded-lg border transition-all duration-300 text-sm ${
+                      className={`p-2 rounded-lg border transition-all duration-300 text-xs sm:text-sm text-center ${
                         formData.sub_subject_id === subSubject.id
                           ? 'border-white bg-white/10 text-white'
                           : 'border-white/20 hover:border-white/40 hover:bg-white/5 text-slate-300'
@@ -281,17 +281,17 @@ export default function NewStudyRecord() {
           )}
 
           {/* Submit Buttons */}
-          <div className="flex gap-4">
+          <div className="flex flex-col xs:flex-row gap-3">
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 py-3 px-6 bg-gradient-to-br from-blue-600 to-blue-500 text-white font-medium rounded-xl hover:from-blue-500 hover:to-blue-400 focus:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-3 px-4 bg-gradient-to-br from-blue-600 to-blue-500 text-white font-medium rounded-xl hover:from-blue-500 hover:to-blue-400 focus:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               {isLoading ? '保存中...' : '学習記録を保存'}
             </button>
             <Link
               href="/student"
-              className="px-6 py-3 bg-black/20 backdrop-blur-sm text-slate-200 font-medium rounded-xl border border-white/10 hover:bg-black/30 hover:border-white/20 transition-all duration-300 text-center"
+              className="px-4 py-3 bg-black/20 backdrop-blur-sm text-slate-200 font-medium rounded-xl border border-white/10 hover:bg-black/30 hover:border-white/20 transition-all duration-300 text-center text-sm"
             >
               キャンセル
             </Link>

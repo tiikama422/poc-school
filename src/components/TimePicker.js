@@ -88,7 +88,7 @@ export default function TimePicker({ hours, minutes, onTimeChange }) {
     return (
       <div className="flex flex-col items-center flex-1">
         <div className="text-sm text-slate-400 mb-2">{isHour ? '時間' : '分'}</div>
-        <div className="relative w-full max-w-[80px]">
+        <div className="relative w-full max-w-[100px] mx-auto">
           <div 
             ref={ref}
             className="h-[96px] overflow-y-auto scrollbar-hide picker-scroll"
@@ -141,8 +141,8 @@ export default function TimePicker({ hours, minutes, onTimeChange }) {
   }
   
   return (
-    <div className="bg-black/30 backdrop-blur-sm rounded-xl p-3 border border-white/10 inline-block">
-      <div className="flex justify-center gap-3">
+    <div className="bg-black/30 backdrop-blur-sm rounded-xl p-3 border border-white/10 w-full max-w-[300px]">
+      <div className="flex justify-center gap-4">
         {renderPickerColumn(hourOptions, selectedHour, 'hour', hourRef)}
         {renderPickerColumn(minuteOptions, selectedMinute, 'minute', minuteRef)}
       </div>
