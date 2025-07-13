@@ -97,21 +97,29 @@ exports.handler = async (event, context) => {
 }
 
 // 学習統計データの取得
+// ローカル日付文字列を取得するヘルパー関数
+function getLocalDateString(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 async function getStudyStats(studentEmail) {
   try {
     const today = new Date()
-    const todayStr = today.toISOString().split('T')[0]
+    const todayStr = getLocalDateString(today)
     
-    // 今週の開始日（月曜日）
+    // 今週の開始日（月曜日）- ローカルタイムゾーン
     const weekStart = new Date(today)
     const day = weekStart.getDay()
     const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1)
     weekStart.setDate(diff)
-    const weekStartStr = weekStart.toISOString().split('T')[0]
+    const weekStartStr = getLocalDateString(weekStart)
 
     // 今月の開始日
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-    const monthStartStr = monthStart.toISOString().split('T')[0]
+    const monthStartStr = getLocalDateString(monthStart)
 
     // 今日の統計
     const todayStats = await getDayStats(studentEmail, todayStr)
@@ -134,7 +142,7 @@ async function getStudyStats(studentEmail) {
     // 昨日の統計（比較用）
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
+    const yesterdayStr = getLocalDateString(yesterday)
     const yesterdayStats = await getDayStats(studentEmail, yesterdayStr)
 
     // 週間データ（グラフ用）
@@ -172,7 +180,7 @@ async function getWeeklyData(studentEmail, weekStart) {
   for (let i = 0; i < 7; i++) {
     const currentDate = new Date(weekStart)
     currentDate.setDate(weekStart.getDate() + i)
-    const dateStr = currentDate.toISOString().split('T')[0]
+    const dateStr = getLocalDateString(currentDate)
     
     const { data, error } = await supabase
       .from('study_records')
@@ -185,7 +193,7 @@ async function getWeeklyData(studentEmail, weekStart) {
       totalMinutes = data.reduce((sum, record) => sum + (record.hours || 0) * 60 + (record.minutes || 0), 0)
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateString(new Date())
     
     weeklyData.push({
       date: dateStr,
@@ -422,7 +430,7 @@ async function getStudyStreak(studentEmail) {
 
 // 今後の予定を取得
 async function getUpcomingEvents(studentEmail) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString(new Date())
   
   const { data, error } = await supabase
     .from('events')
