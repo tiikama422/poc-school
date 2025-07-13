@@ -219,7 +219,7 @@ export default function StudentDashboard() {
                 学習記録を追加
               </Link>
               <Link 
-                href={`/student/study/daily/${new Date().toISOString().split('T')[0]}`}
+                href={`/student/study/daily/${new Date().toLocaleDateString('sv-SE')}`}
                 className="flex-1 bg-gradient-to-r from-green-600 to-green-500 text-white px-3 py-2.5 rounded-xl font-medium text-center hover:from-green-500 hover:to-green-400 transition-all duration-300 flex items-center justify-center text-sm whitespace-nowrap"
               >
                 今日の学習記録
