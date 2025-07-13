@@ -80,8 +80,8 @@ export default function EventModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-lg mx-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-lg mx-4 my-8 max-h-[90vh] flex flex-col">
         {/* Modal Header */}
         <div className="p-6 border-b border-white/10">
           <h3 className="text-xl font-semibold text-white">
@@ -90,8 +90,8 @@ export default function EventModal({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit}>
-          <div className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-6 space-y-4 overflow-y-auto flex-1">
             {/* タイトル */}
             <div>
               <label className="block text-slate-300 text-sm font-medium mb-2">
@@ -126,13 +126,13 @@ export default function EventModal({
               <label className="block text-slate-300 text-sm font-medium mb-2">
                 種類 *
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {eventTypes.map((type) => (
                   <button
                     key={type.value}
                     type="button"
                     onClick={() => handleTypeChange(type.value)}
-                    className={`p-3 rounded-lg border-2 transition-all duration-300 ${
+                    className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-300 text-center ${
                       formData.type === type.value
                         ? 'border-white bg-white/10 transform scale-105'
                         : 'border-white/20 hover:border-white/40 hover:bg-white/5'

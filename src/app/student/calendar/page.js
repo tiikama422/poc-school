@@ -318,10 +318,10 @@ export default function StudyCalendar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-light text-white tracking-wide">学習予定カレンダー</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white tracking-wide">学習予定カレンダー</h1>
           <Link
             href="/student"
             className="text-slate-300 hover:text-white transition-colors font-medium"
@@ -330,13 +330,13 @@ export default function StudyCalendar() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Calendar */}
           <div className="lg:col-span-3">
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
               {/* Calendar Header */}
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold text-white">
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl font-semibold text-white">
                   {currentMonth.getFullYear()}年 {currentMonth.getMonth() + 1}月
                 </h2>
                 <div className="flex gap-2">
@@ -435,9 +435,9 @@ export default function StudyCalendar() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Upcoming Events */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <span className="mr-3 text-2xl">📅</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center">
+                <span className="mr-3 text-xl sm:text-2xl">📅</span>
                 近日の予定
               </h3>
               
@@ -498,9 +498,9 @@ export default function StudyCalendar() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <span className="mr-3 text-2xl">⚡</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center">
+                <span className="mr-3 text-xl sm:text-2xl">⚡</span>
                 クイックアクション
               </h3>
               <div className="space-y-3">
@@ -538,9 +538,9 @@ export default function StudyCalendar() {
             </div>
 
             {/* Today's Memo */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <span className="mr-3 text-2xl">📝</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center">
+                <span className="mr-3 text-xl sm:text-2xl">📝</span>
                 今日のメモ
               </h3>
               
@@ -573,10 +573,19 @@ export default function StudyCalendar() {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Event Modal */}
+        <EventModal
+          isOpen={showEventModal}
+          onClose={handleCloseEventModal}
+          onSave={handleSaveEvent}
+          event={editingEvent}
+          selectedDate={eventModalDate}
+        />
+
+        {/* Memo Modal */}
         {showModal && modalDate && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-md mx-4">
+            <div className="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-md mx-4 max-h-[90vh] flex flex-col">
               {/* Modal Header */}
               <div className="p-6 border-b border-white/10">
                 <h3 className="text-xl font-semibold text-white">
@@ -589,7 +598,7 @@ export default function StudyCalendar() {
               </div>
 
               {/* Modal Body */}
-              <div className="p-6">
+              <div className="p-6 overflow-y-auto flex-1">
                 <div className="mb-4">
                   <label className="block text-slate-300 text-sm font-medium mb-2">
                     ひとこと日記

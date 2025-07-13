@@ -66,37 +66,37 @@ export default function GoalModal({
   ]
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-md mx-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-md mx-4 my-8 max-h-[90vh] flex flex-col">
         {/* Modal Header */}
-        <div className="p-6 border-b border-white/10">
-          <h3 className="text-xl font-semibold text-white">
+        <div className="p-4 sm:p-6 border-b border-white/10 flex-shrink-0">
+          <h3 className="text-lg sm:text-xl font-semibold text-white">
             📊 1日の学習目標を設定
           </h3>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">
             毎日の学習時間の目標を設定してモチベーションを保ちましょう
           </p>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit}>
-          <div className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
             {/* 現在の目標表示 */}
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">
                 {goalHours > 0 && `${goalHours}時間`}
                 {goalMins > 0 && `${goalMins}分`}
                 {goalMinutes === 0 && '未設定'}
               </div>
-              <div className="text-slate-400 text-sm">設定中の目標時間</div>
+              <div className="text-slate-400 text-xs sm:text-sm">設定中の目標時間</div>
             </div>
 
             {/* 時間設定 */}
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-3">
+              <label className="block text-slate-300 text-xs sm:text-sm font-medium mb-3">
                 詳細設定
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-slate-400 text-xs mb-1">時間</label>
                   <input
@@ -105,7 +105,7 @@ export default function GoalModal({
                     max="12"
                     value={goalHours}
                     onChange={(e) => handleHoursChange(e.target.value)}
-                    className="w-full px-3 py-2 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg text-white text-center focus:border-white/30 focus:outline-none transition-all duration-300"
+                    className="w-full px-2 py-2 sm:px-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg text-white text-center focus:border-white/30 focus:outline-none transition-all duration-300 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -116,7 +116,7 @@ export default function GoalModal({
                     max="59"
                     value={goalMins}
                     onChange={(e) => handleMinutesChange(e.target.value)}
-                    className="w-full px-3 py-2 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg text-white text-center focus:border-white/30 focus:outline-none transition-all duration-300"
+                    className="w-full px-2 py-2 sm:px-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg text-white text-center focus:border-white/30 focus:outline-none transition-all duration-300 text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -124,22 +124,22 @@ export default function GoalModal({
 
             {/* クイック設定 */}
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-3">
+              <label className="block text-slate-300 text-xs sm:text-sm font-medium mb-3">
                 クイック設定
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {quickOptions.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => handleQuickSet(option.value)}
-                    className={`p-3 rounded-lg border-2 transition-all duration-300 ${
+                    className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-300 text-center ${
                       goalMinutes === option.value
                         ? 'border-blue-500 bg-blue-500/20 text-blue-400'
                         : 'border-white/20 text-slate-300 hover:border-white/40 hover:bg-white/5'
                     }`}
                   >
-                    <div className="font-medium text-sm">{option.label}</div>
+                    <div className="font-medium text-xs sm:text-sm">{option.label}</div>
                   </button>
                 ))}
               </div>
@@ -150,7 +150,7 @@ export default function GoalModal({
               <div className="flex items-start gap-3">
                 <div className="text-blue-400 mt-0.5">💡</div>
                 <div>
-                  <div className="text-blue-400 font-medium text-sm mb-1">目標設定のメリット</div>
+                  <div className="text-blue-400 font-medium text-xs sm:text-sm mb-1">目標設定のメリット</div>
                   <div className="text-slate-300 text-xs leading-relaxed">
                     • 毎日の進捗が視覚的に分かりやすくなります<br/>
                     • 達成感を得られてモチベーションが向上します<br/>
@@ -162,7 +162,7 @@ export default function GoalModal({
           </div>
 
           {/* Modal Footer */}
-          <div className="p-6 border-t border-white/10 flex justify-end gap-3">
+          <div className="p-4 sm:p-6 border-t border-white/10 flex justify-end gap-3 flex-shrink-0">
             <button
               type="button"
               onClick={onClose}

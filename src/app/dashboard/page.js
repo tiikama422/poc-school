@@ -48,20 +48,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-light text-white tracking-wide">{user?.fullName || user?.email}さんこんにちは</h1>
-          <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white tracking-wide">{user?.fullName || user?.email}さんこんにちは</h1>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <Link
               href="/"
-              className="text-slate-300 hover:text-white transition-colors font-medium"
+              className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-4 sm:py-0"
             >
               ← ホームに戻る
             </Link>
             <button
               onClick={handleLogout}
-              className="bg-gradient-to-br from-slate-700 to-slate-600 text-white px-6 py-2 rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-300 border border-white/10"
+              className="bg-gradient-to-br from-slate-700 to-slate-600 text-white px-4 py-3 sm:px-6 sm:py-2 rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-300 border border-white/10 text-center"
             >
               ログアウト
             </button>
@@ -69,77 +69,77 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Study Statistics */}
           <div className="lg:col-span-2 space-y-6">
             {/* Today's Progress */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📚</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="mr-3 text-xl sm:text-2xl">📚</span>
                 今日の学習進捗
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-400">2.5</div>
-                  <div className="text-slate-400 text-sm">時間</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-400">2.5</div>
+                  <div className="text-slate-400 text-xs sm:text-sm">時間</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-400">85%</div>
-                  <div className="text-slate-400 text-sm">理解度</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-green-400">85%</div>
+                  <div className="text-slate-400 text-xs sm:text-sm">理解度</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-400">12</div>
-                  <div className="text-slate-400 text-sm">問題数</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-400">12</div>
+                  <div className="text-slate-400 text-xs sm:text-sm">問題数</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-400">3</div>
-                  <div className="text-slate-400 text-sm">科目</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-400">3</div>
+                  <div className="text-slate-400 text-xs sm:text-sm">科目</div>
                 </div>
               </div>
             </div>
 
             {/* Recent Activities */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">⏰</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="mr-3 text-xl sm:text-2xl">⏰</span>
                 最近の学習履歴
               </h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-black/20 rounded-lg">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-center justify-between p-3 sm:p-4 bg-black/20 rounded-lg">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                    <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
                       <span className="text-blue-400">📊</span>
                     </div>
                     <div>
-                      <div className="text-white font-medium">数学 - 微積分</div>
-                      <div className="text-slate-400 text-sm">30分前</div>
+                      <div className="text-white font-medium text-sm sm:text-base">数学 - 微積分</div>
+                      <div className="text-slate-400 text-xs sm:text-sm">30分前</div>
                     </div>
                   </div>
-                  <div className="text-green-400 font-medium">完了</div>
+                  <div className="text-green-400 font-medium text-sm sm:text-base">完了</div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-black/20 rounded-lg">
+                <div className="flex items-center justify-between p-3 sm:p-4 bg-black/20 rounded-lg">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mr-4">
                       <span className="text-green-400">📝</span>
                     </div>
                     <div>
-                      <div className="text-white font-medium">英語 - 文法演習</div>
-                      <div className="text-slate-400 text-sm">1時間前</div>
+                      <div className="text-white font-medium text-sm sm:text-base">英語 - 文法演習</div>
+                      <div className="text-slate-400 text-xs sm:text-sm">1時間前</div>
                     </div>
                   </div>
-                  <div className="text-green-400 font-medium">完了</div>
+                  <div className="text-green-400 font-medium text-sm sm:text-base">完了</div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-black/20 rounded-lg">
+                <div className="flex items-center justify-between p-3 sm:p-4 bg-black/20 rounded-lg">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mr-4">
                       <span className="text-purple-400">🔬</span>
                     </div>
                     <div>
-                      <div className="text-white font-medium">物理 - 力学</div>
-                      <div className="text-slate-400 text-sm">2時間前</div>
+                      <div className="text-white font-medium text-sm sm:text-base">物理 - 力学</div>
+                      <div className="text-slate-400 text-xs sm:text-sm">2時間前</div>
                     </div>
                   </div>
-                  <div className="text-yellow-400 font-medium">進行中</div>
+                  <div className="text-yellow-400 font-medium text-sm sm:text-base">進行中</div>
                 </div>
               </div>
             </div>
@@ -148,9 +148,9 @@ export default function Dashboard() {
           {/* Right Column - Quick Actions & Profile */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">⚡</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="mr-3 text-xl sm:text-2xl">⚡</span>
                 クイックアクション
               </h2>
               <div className="space-y-3">
@@ -176,12 +176,12 @@ export default function Dashboard() {
             </div>
 
             {/* Profile Summary */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">👤</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="mr-3 text-xl sm:text-2xl">👤</span>
                 プロフィール
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-600 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <span className="text-2xl text-slate-300">Σ</span>

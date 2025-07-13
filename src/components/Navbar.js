@@ -24,24 +24,24 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center h-14 sm:h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-gray-900">
+            <Link href="/" className="text-lg sm:text-xl font-bold text-gray-900">
               Next.js App
             </Link>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {user ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 <Link
                   href="/dashboard"
-                  className="text-gray-700 hover:text-gray-900"
+                  className="text-gray-700 hover:text-gray-900 text-sm sm:text-base px-2 py-1 sm:px-0"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/logout"
-                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                  className="bg-red-600 text-white px-3 py-2 sm:px-4 rounded-md hover:bg-red-700 text-sm sm:text-base"
                 >
                   Logout
                 </Link>
@@ -49,7 +49,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                className="bg-blue-600 text-white px-3 py-2 sm:px-4 rounded-md hover:bg-blue-700 text-sm sm:text-base"
               >
                 Login
               </Link>

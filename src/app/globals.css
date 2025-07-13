@@ -16,6 +16,13 @@
   }
 }
 
+/* モバイル向けの基本設定 */
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -24,4 +31,34 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  /* モバイルでのスクロールを滑らかに */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* タッチターゲットの最小サイズを確保 */
+button, a, input, textarea, select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* モバイルでのフォントサイズを読みやすく */
+@media (max-width: 640px) {
+  html {
+    font-size: 16px;
+  }
+  
+  body {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  /* 小さいボタンやリンクをタップしやすく */
+  button, a {
+    padding: 12px 16px;
+  }
+  
+  input, textarea, select {
+    font-size: 16px; /* iOSでのズームを防ぐ */
+    padding: 12px;
+  }
 }
