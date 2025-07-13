@@ -40,37 +40,36 @@ exports.handler = async (event, context) => {
       hasKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
     })
 
-    // Supabaseの認証システムを使用
-    const { data, error } = await supabase.rpc('authenticate_user', {
-      p_email: email,
-      p_password: password
+    // Supabase標準認証を使用
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
     })
 
-    if (error) {
-      console.error('Authentication error:', error)
+    if (authError) {
+      console.error('Authentication error:', authError)
       return {
-        statusCode: 500,
+        statusCode: 401,
         headers,
-        body: JSON.stringify({ error: 'データベースエラーが発生しました' })
+        body: JSON.stringify({ error: 'メールアドレスまたはパスワードが正しくありません' })
       }
     }
 
-    // 認証成功チェック
-    if (data && data.is_authenticated) {
+    if (authData.user) {
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
           success: true,
           user: {
-            id: data.user_id,
-            email: data.email,
-            fullName: data.full_name,
-            userType: data.user_type,
-            isAdmin: data.user_type === 'admin',
-            grade: data.grade || null,
-            className: data.class_name || null,
-            studentNumber: data.student_number || null
+            id: authData.user.id,
+            email: authData.user.email,
+            fullName: authData.user.user_metadata?.full_name || '',
+            userType: 'student', // デフォルトで学生
+            isAdmin: false,
+            grade: null,
+            className: null,
+            studentNumber: null
           }
         })
       }
