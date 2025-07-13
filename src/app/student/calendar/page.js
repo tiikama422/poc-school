@@ -318,25 +318,25 @@ export default function StudyCalendar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white tracking-wide">学習予定カレンダー</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-wide">学習予定カレンダー</h1>
           <Link
             href="/student"
-            className="text-slate-300 hover:text-white transition-colors font-medium"
+            className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm whitespace-nowrap"
           >
-            ← ダッシュボードに戻る
+            戻る
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Calendar */}
           <div className="lg:col-span-3">
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4">
               {/* Calendar Header */}
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-semibold text-white">
+              <div className="flex justify-between items-center mb-3 sm:mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-white">
                   {currentMonth.getFullYear()}年 {currentMonth.getMonth() + 1}月
                 </h2>
                 <div className="flex gap-2">
@@ -371,13 +371,13 @@ export default function StudyCalendar() {
               </div>
 
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1 md:gap-2">
+              <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map((day, index) => (
                   <div
                     key={index}
                     onClick={() => handleDateClick(day)}
                     className={`
-                      relative min-h-[48px] md:min-h-[80px] p-2 rounded-lg cursor-pointer transition-all duration-200
+                      relative min-h-[40px] sm:min-h-[60px] p-1 sm:p-2 rounded-lg cursor-pointer transition-all duration-200
                       ${day.isCurrentMonth 
                         ? 'hover:bg-slate-700/30' 
                         : 'text-slate-600'
@@ -433,11 +433,11 @@ export default function StudyCalendar() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Upcoming Events */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center">
-                <span className="mr-3 text-xl sm:text-2xl">📅</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                <span className="mr-2 text-lg">📅</span>
                 近日の予定
               </h3>
               
@@ -498,17 +498,17 @@ export default function StudyCalendar() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center">
-                <span className="mr-3 text-xl sm:text-2xl">⚡</span>
-                クイックアクション
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                <span className="mr-2 text-lg">⚡</span>
+                アクション
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <button 
                   onClick={() => handleAddEvent()}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-xl font-medium hover:from-blue-500 hover:to-blue-400 transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-2.5 rounded-xl font-medium hover:from-blue-500 hover:to-blue-400 transition-all duration-300 text-sm"
                 >
-                  📅 新しい予定を追加
+                  予定を追加
                 </button>
                 <button 
                   onClick={() => {
@@ -518,29 +518,29 @@ export default function StudyCalendar() {
                     setIsEditing(!!memos[today.toISOString().split('T')[0]])
                     setShowModal(true)
                   }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white px-4 py-3 rounded-xl font-medium hover:from-purple-500 hover:to-purple-400 transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white px-3 py-2.5 rounded-xl font-medium hover:from-purple-500 hover:to-purple-400 transition-all duration-300 text-sm"
                 >
-                  📝 今日のメモを追加
+                  メモを追加
                 </button>
                 <Link 
                   href="/student/study/new"
-                  className="block w-full bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-3 rounded-xl font-medium text-center hover:from-green-500 hover:to-green-400 transition-all duration-300"
+                  className="block w-full bg-gradient-to-r from-green-600 to-green-500 text-white px-3 py-2.5 rounded-xl font-medium text-center hover:from-green-500 hover:to-green-400 transition-all duration-300 text-sm"
                 >
-                  📚 学習記録を追加
+                  学習記録を追加
                 </Link>
                 <Link 
                   href="/student/study"
-                  className="block w-full bg-gradient-to-r from-slate-700 to-slate-600 text-white px-4 py-3 rounded-xl font-medium text-center hover:from-slate-600 hover:to-slate-500 transition-all duration-300"
+                  className="block w-full bg-gradient-to-r from-slate-700 to-slate-600 text-white px-3 py-2.5 rounded-xl font-medium text-center hover:from-slate-600 hover:to-slate-500 transition-all duration-300 text-sm"
                 >
-                  📋 学習記録一覧
+                  記録一覧
                 </Link>
               </div>
             </div>
 
             {/* Today's Memo */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center">
-                <span className="mr-3 text-xl sm:text-2xl">📝</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                <span className="mr-2 text-lg">📝</span>
                 今日のメモ
               </h3>
               

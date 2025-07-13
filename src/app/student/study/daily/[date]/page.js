@@ -71,10 +71,9 @@ export default function DailyStudyDetail() {
     
     return {
       formatted: date.toLocaleDateString('ja-JP', { 
-        year: 'numeric',
-        month: 'long', 
+        month: 'numeric',
         day: 'numeric' 
-      }),
+      }) + '日',
       dayOfWeek: dayOfWeek
     }
   }
@@ -164,56 +163,56 @@ export default function DailyStudyDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-5xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 sm:mb-6 gap-3">
           <div>
-            <h1 className="text-4xl font-light text-white tracking-wide">
-              {dateInfo.formatted} ({dateInfo.dayOfWeek}) の記録
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-wide">
+              {dateInfo.formatted}({dateInfo.dayOfWeek})の記録
             </h1>
-            <div className="mt-2 flex items-center gap-6 text-slate-300">
-              <span>合計学習時間: <span className="text-blue-400 font-medium">{formatTime(totalMinutes)}</span></span>
-              <span>学習科目数: <span className="text-green-400 font-medium">{subjectCount}科目</span></span>
+            <div className="mt-2 flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 text-slate-300 text-sm">
+              <span>合計: <span className="text-blue-400 font-medium">{formatTime(totalMinutes)}</span></span>
+              <span>科目数: <span className="text-green-400 font-medium">{subjectCount}科目</span></span>
             </div>
           </div>
           <Link
             href="/student"
-            className="text-slate-300 hover:text-white transition-colors font-medium"
+            className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm whitespace-nowrap"
           >
-            ← ダッシュボードに戻る
+            戻る
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column - Charts and Summary */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-4">
             {/* Subject Balance */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📊</span>
-                科目別学習内訳
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <span className="mr-2 text-lg">📊</span>
+                科目別内訳
               </h2>
               <SubjectPieChart subjects={dailyData?.subjectSummary || []} />
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <span className="mr-3 text-2xl">⚡</span>
-                クイックアクション
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white mb-3 flex items-center">
+                <span className="mr-2 text-lg">⚡</span>
+                アクション
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Link 
                   href="/student/study/new"
-                  className="block w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-xl font-medium text-center hover:from-blue-500 hover:to-blue-400 transition-all duration-300"
+                  className="block w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-2.5 rounded-xl font-medium text-center hover:from-blue-500 hover:to-blue-400 transition-all duration-300 text-sm"
                 >
-                  ➕ 新しい記録を追加
+                  記録を追加
                 </Link>
                 <Link 
                   href="/student/study"
-                  className="block w-full bg-gradient-to-r from-slate-700 to-slate-600 text-white px-4 py-3 rounded-xl font-medium text-center hover:from-slate-600 hover:to-slate-500 transition-all duration-300"
+                  className="block w-full bg-gradient-to-r from-slate-700 to-slate-600 text-white px-3 py-2.5 rounded-xl font-medium text-center hover:from-slate-600 hover:to-slate-500 transition-all duration-300 text-sm"
                 >
-                  📚 学習記録一覧
+                  記録一覧
                 </Link>
               </div>
             </div>
@@ -221,9 +220,9 @@ export default function DailyStudyDetail() {
 
           {/* Right Column - Study Log */}
           <div className="lg:col-span-2">
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📝</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <span className="mr-2 text-lg">📝</span>
                 学習ログ
               </h2>
               
@@ -232,12 +231,12 @@ export default function DailyStudyDetail() {
                   {dailyData.records
                     .sort((a, b) => new Date(`${a.study_date}T${a.created_at}`) - new Date(`${b.study_date}T${b.created_at}`))
                     .map((record, index) => (
-                    <div key={record.id} className="bg-black/20 rounded-lg p-5 hover:bg-black/30 transition-colors">
+                    <div key={record.id} className="bg-black/20 rounded-lg p-3 sm:p-4 hover:bg-black/30 transition-colors">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
+                        <div className="flex items-start space-x-3 flex-1">
                           {/* Subject Icon */}
                           <div 
-                            className="w-12 h-12 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-sm sm:text-lg flex-shrink-0"
                             style={{ backgroundColor: `${record.subjects?.color || '#95A5A6'}20` }}
                           >
                             {getSubjectIcon(record.subjects?.name)}
@@ -245,11 +244,11 @@ export default function DailyStudyDetail() {
                           
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-lg font-medium text-white">
+                            <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-3 mb-2">
+                              <h3 className="text-base font-medium text-white">
                                 {record.subjects?.name || '不明な科目'}
                               </h3>
-                              <span className="text-blue-400 font-medium">
+                              <span className="text-blue-400 font-medium text-sm">
                                 {formatTime((record.hours || 0) * 60 + (record.minutes || 0))}
                               </span>
                             </div>
@@ -270,7 +269,7 @@ export default function DailyStudyDetail() {
                         </div>
                         
                         {/* Actions */}
-                        <div className="flex items-center gap-2 ml-4">
+                        <div className="flex items-center gap-1 ml-2 sm:ml-4">
                           <button
                             onClick={() => handleEdit(record.id)}
                             className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
@@ -302,9 +301,8 @@ export default function DailyStudyDetail() {
                   <p className="text-slate-400 mb-4">この日の学習記録はありません</p>
                   <Link 
                     href="/student/study/new"
-                    className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-medium transition-colors text-sm"
                   >
-                    <span className="mr-2">➕</span>
                     学習記録を追加
                   </Link>
                 </div>
