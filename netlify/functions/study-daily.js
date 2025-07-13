@@ -70,14 +70,128 @@ exports.handler = async (event, context) => {
     
     console.log('Environment variables OK')
     
-    // まずは基本的なレスポンスを返す
+    // 認証チェック
+    const authHeader = event.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('Missing or invalid authorization header')
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ error: 'Authorization required' })
+      }
+    }
+
+    const token = authHeader.split(' ')[1]
+    let user
+    try {
+      const decodedData = safeBase64Decode(token)
+      user = JSON.parse(decodedData)
+      console.log('User authenticated:', { email: user.email, userType: user.userType })
+    } catch (error) {
+      console.error('Token decode error:', error)
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ error: 'Invalid token' })
+      }
+    }
+
+    if (user.userType !== 'student') {
+      console.log('Unauthorized user type:', user.userType)
+      return {
+        statusCode: 403,
+        headers,
+        body: JSON.stringify({ error: 'Access denied' })
+      }
+    }
+
+    // 日付パラメータの取得
+    const date = event.queryStringParameters?.date
+    if (!date) {
+      console.log('Missing date parameter')
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Date parameter is required' })
+      }
+    }
+
+    console.log('Fetching daily data for:', { date, userEmail: user.email })
+
+    // その日の学習記録を取得
+    const { data: records, error: recordsError } = await supabase
+      .from('study_records')
+      .select(`
+        id,
+        study_date,
+        hours,
+        minutes,
+        memo,
+        created_at,
+        subject_id,
+        subjects (
+          id,
+          name,
+          color
+        )
+      `)
+      .eq('student_email', user.email)
+      .eq('study_date', date)
+      .order('created_at', { ascending: true })
+
+    if (recordsError) {
+      console.error('Records query error:', recordsError)
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Failed to fetch study records' })
+      }
+    }
+
+    console.log('Found records:', records?.length || 0)
+
+    // 科目別の集計データを作成
+    const subjectSummary = {}
+    let totalMinutes = 0
+
+    records?.forEach(record => {
+      const minutes = (record.hours || 0) * 60 + (record.minutes || 0)
+      totalMinutes += minutes
+
+      if (record.subjects) {
+        const subjectId = record.subjects.id
+        if (!subjectSummary[subjectId]) {
+          subjectSummary[subjectId] = {
+            id: subjectId,
+            name: record.subjects.name,
+            color: record.subjects.color,
+            totalMinutes: 0
+          }
+        }
+        subjectSummary[subjectId].totalMinutes += minutes
+      }
+    })
+
+    const subjectSummaryArray = Object.values(subjectSummary)
+
+    const responseData = {
+      records: records || [],
+      subjectSummary: subjectSummaryArray,
+      totalMinutes: totalMinutes
+    }
+
+    console.log('Response data:', {
+      recordCount: responseData.records.length,
+      subjectCount: responseData.subjectSummary.length,
+      totalMinutes: responseData.totalMinutes
+    })
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        message: 'Basic function test successful',
-        timestamp: new Date().toISOString()
+        data: responseData
       })
     }
 
