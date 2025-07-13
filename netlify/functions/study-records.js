@@ -122,6 +122,7 @@ async function createStudyRecord(event, sessionUser, headers) {
       .from('study_records')
       .insert([
         {
+          user_id: sessionUser.id,
           student_email: sessionUser.email,
           study_date,
           subject_id: parseInt(subject_id),
@@ -193,7 +194,7 @@ async function getStudyRecords(event, sessionUser, headers) {
         *,
         subjects(name, color)
       `)
-      .eq('student_email', sessionUser.email)
+      .eq('user_id', sessionUser.id)
       .order('study_date', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(parseInt(limit))
@@ -250,7 +251,7 @@ async function getSingleStudyRecord(recordId, sessionUser, headers) {
         subjects(name, color)
       `)
       .eq('id', recordId)
-      .eq('student_email', sessionUser.email)
+      .eq('user_id', sessionUser.id)
       .single()
 
     if (error) {
@@ -326,7 +327,7 @@ async function updateStudyRecord(event, sessionUser, headers) {
         updated_at: new Date().toISOString()
       })
       .eq('id', recordId)
-      .eq('student_email', sessionUser.email)
+      .eq('user_id', sessionUser.id)
       .select()
 
     if (error) {
@@ -384,7 +385,7 @@ async function deleteStudyRecord(event, sessionUser, headers) {
       .from('study_records')
       .delete()
       .eq('id', recordId)
-      .eq('student_email', sessionUser.email)
+      .eq('user_id', sessionUser.id)
       .select()
 
     if (error) {
