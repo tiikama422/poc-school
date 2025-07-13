@@ -23,7 +23,7 @@ export default function WeeklyChart({ weeklyData = [] }) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {weeklyData.map((day, index) => {
         const widthPercentage = maxTime > 0 ? (day.totalMinutes / maxTime) * 100 : 0
         const isToday = day.isToday
@@ -34,10 +34,10 @@ export default function WeeklyChart({ weeklyData = [] }) {
             href={`/student/study/daily/${day.date}`}
             className="block group"
           >
-            <div className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+            <div className={`flex items-center justify-between p-2 rounded-lg transition-all duration-200 ${
               isToday ? 'bg-blue-500/10 border border-blue-500/20' : 'hover:bg-black/20'
             }`}>
-              <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className={`text-sm font-medium w-6 ${
                   isToday ? 'text-blue-400' : 'text-slate-400'
                 }`}>
@@ -45,7 +45,7 @@ export default function WeeklyChart({ weeklyData = [] }) {
                 </div>
                 
                 <div className="flex-1 relative">
-                  <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all duration-500 ${
                         isToday ? 'bg-gradient-to-r from-blue-500 to-blue-400' : 'bg-gradient-to-r from-slate-500 to-slate-400'
@@ -55,7 +55,7 @@ export default function WeeklyChart({ weeklyData = [] }) {
                   </div>
                 </div>
                 
-                <div className={`text-sm font-medium min-w-[60px] text-right ${
+                <div className={`text-sm font-medium min-w-[50px] text-right ${
                   isToday ? 'text-blue-400' : 'text-slate-300'
                 }`}>
                   {day.totalMinutes > 0 ? formatTime(day.totalMinutes) : '0m'}

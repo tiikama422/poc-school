@@ -21,12 +21,12 @@ export default function NewStudyRecord() {
   const router = useRouter()
 
   const subjects = [
-    { id: 1, name: '国語', color: '#E74C3C', icon: '📖' },
-    { id: 2, name: '数学', color: '#3498DB', icon: '📊' },
-    { id: 3, name: '英語', color: '#2ECC71', icon: '🌍' },
-    { id: 4, name: '理科', color: '#9B59B6', icon: '🔬' },
-    { id: 5, name: '社会', color: '#F39C12', icon: '🏛️' },
-    { id: 6, name: 'その他', color: '#95A5A6', icon: '📝' }
+    { id: 1, name: '国語', color: '#E74C3C' },
+    { id: 2, name: '数学', color: '#3498DB' },
+    { id: 3, name: '英語', color: '#2ECC71' },
+    { id: 4, name: '理科', color: '#9B59B6' },
+    { id: 5, name: '社会', color: '#F39C12' },
+    { id: 6, name: 'その他', color: '#95A5A6' }
   ]
 
   const subSubjects = {
@@ -147,9 +147,9 @@ export default function NewStudyRecord() {
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-wide">学習記録を追加</h1>
           <Link
             href="/student"
-            className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm"
+            className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm whitespace-nowrap"
           >
-ダッシュボードに戻る
+            ダッシュボード
           </Link>
         </div>
 
@@ -203,20 +203,19 @@ export default function NewStudyRecord() {
               教科選択 *
             </h2>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {subjects.map((subject) => (
                 <button
                   key={subject.id}
                   type="button"
                   onClick={() => handleSubjectSelect(subject.id)}
-                  className={`p-3 rounded-xl border-2 transition-all duration-300 text-center ${
+                  className={`p-2.5 rounded-xl border-2 transition-all duration-300 text-center min-h-[44px] ${
                     formData.subject_id === subject.id
                       ? 'border-white bg-white/10 transform scale-105'
                       : 'border-white/20 hover:border-white/40 hover:bg-white/5'
                   }`}
                   style={{ borderColor: formData.subject_id === subject.id ? subject.color : undefined }}
                 >
-                  <div className="text-lg mb-1">{subject.icon}</div>
                   <div 
                     className="font-medium text-sm"
                     style={{ color: subject.color }}
@@ -285,13 +284,13 @@ export default function NewStudyRecord() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 py-3 px-4 bg-gradient-to-br from-blue-600 to-blue-500 text-white font-medium rounded-xl hover:from-blue-500 hover:to-blue-400 focus:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="flex-1 py-2.5 px-3 bg-gradient-to-br from-blue-600 to-blue-500 text-white font-medium rounded-xl hover:from-blue-500 hover:to-blue-400 focus:outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
             >
               {isLoading ? '保存中...' : '学習記録を保存'}
             </button>
             <Link
               href="/student"
-              className="px-4 py-3 bg-black/20 backdrop-blur-sm text-slate-200 font-medium rounded-xl border border-white/10 hover:bg-black/30 hover:border-white/20 transition-all duration-300 text-center text-sm"
+              className="px-3 py-2.5 bg-black/20 backdrop-blur-sm text-slate-200 font-medium rounded-xl border border-white/10 hover:bg-black/30 hover:border-white/20 transition-all duration-300 text-center text-sm whitespace-nowrap"
             >
               キャンセル
             </Link>

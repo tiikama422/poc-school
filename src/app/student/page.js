@@ -188,15 +188,9 @@ export default function StudentDashboard() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-wide">{user?.fullName}さんの学習ページ</h1>
           <div className="flex flex-col xs:flex-row gap-2 xs:gap-3">
-            <Link
-              href="/"
-              className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm"
-            >
-ホームに戻る
-            </Link>
             <button
               onClick={handleLogout}
-              className="bg-gradient-to-br from-slate-700 to-slate-600 text-white px-4 py-2 rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-300 border border-white/10 text-sm"
+              className="bg-gradient-to-br from-slate-700 to-slate-600 text-white px-3 py-2 rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-300 border border-white/10 text-sm whitespace-nowrap"
             >
               ログアウト
             </button>
@@ -220,13 +214,13 @@ export default function StudentDashboard() {
             <div className="flex flex-col xs:flex-row gap-3">
               <Link 
                 href="/student/study/new"
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-xl font-medium text-center hover:from-blue-500 hover:to-blue-400 transition-all duration-300 flex items-center justify-center text-sm"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-2.5 rounded-xl font-medium text-center hover:from-blue-500 hover:to-blue-400 transition-all duration-300 flex items-center justify-center text-sm whitespace-nowrap"
               >
-学習記録を追加
+                学習記録を追加
               </Link>
               <Link 
                 href="/student/study"
-                className="flex-1 bg-gradient-to-r from-slate-700 to-slate-600 text-white px-4 py-3 rounded-xl font-medium text-center hover:from-slate-600 hover:to-slate-500 transition-all duration-300 flex items-center justify-center text-sm"
+                className="flex-1 bg-gradient-to-r from-slate-700 to-slate-600 text-white px-3 py-2.5 rounded-xl font-medium text-center hover:from-slate-600 hover:to-slate-500 transition-all duration-300 flex items-center justify-center text-sm whitespace-nowrap"
               >
                 学習記録一覧
               </Link>
@@ -312,33 +306,33 @@ export default function StudentDashboard() {
             </div>
             
             {/* Weekly Learning Snapshot */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-white">
                   統計情報
                 </h2>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
                 {/* Weekly Bar Chart */}
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-3">週間学習時間</h3>
+                  <h3 className="text-sm font-medium text-slate-300 mb-2">週間学習時間</h3>
                   <WeeklyChart weeklyData={stats?.weeklyData || []} />
                 </div>
                 
                 {/* Subject Balance Pie Chart */}
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-3">今週の科目バランス</h3>
+                  <h3 className="text-sm font-medium text-slate-300 mb-2">今週の科目バランス</h3>
                   <SubjectPieChart subjects={stats?.weeklySubjects || []} />
                 </div>
               </div>
             </div>
 
             {/* Recent Study Records */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-white flex items-center">
-                  <span className="mr-3 text-2xl">📚</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-white flex items-center">
+                  <span className="mr-2 text-lg">📚</span>
                   最近の学習記録
                 </h2>
                 <Link 
@@ -348,13 +342,13 @@ export default function StudentDashboard() {
                   すべて見る →
                 </Link>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {stats?.recentRecords && stats.recentRecords.length > 0 ? (
                   stats.recentRecords.map((record) => (
-                    <div key={record.id} className="flex items-center justify-between p-4 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
+                    <div key={record.id} className="flex items-center justify-between p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
                       <div className="flex items-center space-x-3">
                         <div 
-                          className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
                           style={{ backgroundColor: `${record.subjects?.color || '#95A5A6'}20` }}
                         >
                           {getSubjectIcon(record.subjects?.name)}
@@ -394,12 +388,12 @@ export default function StudentDashboard() {
           </div>
 
           {/* Right Column - Enhanced Stats & Schedule */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             
             {/* Upcoming Events */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📅</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <span className="mr-2 text-lg">📅</span>
                 今後の予定
               </h2>
               <div className="space-y-3">
@@ -436,25 +430,25 @@ export default function StudentDashboard() {
             </div>
 
             {/* Subject Overview */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">📚</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <span className="mr-2 text-lg">📚</span>
                 科目別学習時間
               </h2>
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
                 {stats?.subjects && stats.subjects.length > 0 ? (
                   stats.subjects.map((subject) => (
-                    <div key={subject.id} className="flex items-center justify-between">
-                      <div className="flex items-center">
+                    <div key={subject.id} className="bg-black/20 rounded-lg p-2.5">
+                      <div className="flex items-center mb-1.5">
                         <div 
-                          className="w-4 h-4 rounded mr-3"
+                          className="w-3 h-3 rounded mr-2"
                           style={{ backgroundColor: subject.color }}
                         ></div>
-                        <span className="text-slate-300">{subject.name}</span>
+                        <span className="text-slate-300 text-sm">{subject.name}</span>
                       </div>
-                      <span className="text-white">
+                      <div className="text-white font-medium text-sm">
                         {formatTime((subject.totalHours || 0) * 60 + (subject.displayMinutes || 0))}
-                      </span>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -465,15 +459,15 @@ export default function StudentDashboard() {
                     { name: '理科', color: '#9B59B6' },
                     { name: '社会', color: '#F39C12' }
                   ].map((subject) => (
-                    <div key={subject.name} className="flex items-center justify-between">
-                      <div className="flex items-center">
+                    <div key={subject.name} className="bg-black/20 rounded-lg p-3">
+                      <div className="flex items-center mb-2">
                         <div 
-                          className="w-4 h-4 rounded mr-3"
+                          className="w-3 h-3 rounded mr-2"
                           style={{ backgroundColor: subject.color }}
                         ></div>
-                        <span className="text-slate-300">{subject.name}</span>
+                        <span className="text-slate-300 text-sm">{subject.name}</span>
                       </div>
-                      <span className="text-white">0時間</span>
+                      <div className="text-white font-medium text-sm">0時間</div>
                     </div>
                   ))
                 )}
@@ -481,16 +475,16 @@ export default function StudentDashboard() {
             </div>
 
             {/* Learning Motivation */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                <span className="mr-3 text-2xl">🏆</span>
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <span className="mr-2 text-lg">🏆</span>
                 学習の記録
               </h2>
-              <div className="space-y-4">
-                <div className="text-center p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-500/20">
-                  <div className="text-2xl mb-2">🔥</div>
-                  <div className="text-lg font-bold text-white">{stats?.streakDays || 0}日連続</div>
-                  <div className="text-sm text-slate-300">学習記録継続中！</div>
+              <div className="space-y-3">
+                <div className="text-center p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-500/20">
+                  <div className="text-lg mb-1">🔥</div>
+                  <div className="text-base font-bold text-white">{stats?.streakDays || 0}日連続</div>
+                  <div className="text-xs text-slate-300">学習記録継続中！</div>
                 </div>
                 
                 {stats?.achievements && stats.achievements.length > 0 && (

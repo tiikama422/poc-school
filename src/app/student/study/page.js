@@ -135,29 +135,28 @@ export default function StudyRecords() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-5xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-light text-white tracking-wide">学習記録一覧</h1>
-          <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-wide">学習記録一覧</h1>
+          <div className="flex flex-col xs:flex-row gap-2 xs:gap-3">
             <Link
               href="/student/study/new"
-              className="bg-gradient-to-br from-blue-600 to-blue-500 text-white px-6 py-2 rounded-lg hover:from-blue-500 hover:to-blue-400 transition-all duration-300 flex items-center"
+              className="bg-gradient-to-br from-blue-600 to-blue-500 text-white px-3 py-2 rounded-lg hover:from-blue-500 hover:to-blue-400 transition-all duration-300 text-center text-sm whitespace-nowrap"
             >
-              <span className="mr-2">➕</span>
               記録を追加
             </Link>
             <Link
               href="/student"
-              className="text-slate-300 hover:text-white transition-colors font-medium"
+              className="text-slate-300 hover:text-white transition-colors font-medium text-center py-2 px-3 rounded text-sm whitespace-nowrap"
             >
-              ← ダッシュボードに戻る
+              ダッシュボード
             </Link>
           </div>
         </div>
 
         {/* Filter Tabs */}
-        <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 mb-8">
+        <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex gap-2">
             {[
               { key: 'all', label: 'すべて' },
@@ -181,7 +180,7 @@ export default function StudyRecords() {
 
         {/* Records List */}
         {records.length === 0 ? (
-          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-12 text-center">
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 lg:p-12 text-center">
             <div className="text-slate-400 mb-6">
               <span className="text-6xl">📚</span>
             </div>
@@ -189,16 +188,15 @@ export default function StudyRecords() {
             <p className="text-slate-400 mb-6">最初の学習記録を追加して、学習の進捗を記録しましょう。</p>
             <Link
               href="/student/study/new"
-              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded-lg font-medium transition-colors text-sm"
             >
-              <span className="mr-2 text-xl">➕</span>
               最初の記録を追加
             </Link>
           </div>
         ) : (
           <div className="space-y-4">
             {records.map((record) => (
-              <div key={record.id} className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-300">
+              <div key={record.id} className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5 lg:p-6 hover:border-white/20 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     {/* Subject Icon */}
