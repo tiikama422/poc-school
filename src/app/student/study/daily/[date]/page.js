@@ -73,7 +73,7 @@ export default function DailyStudyDetail() {
       formatted: date.toLocaleDateString('ja-JP', { 
         month: 'numeric',
         day: 'numeric' 
-      }) + '日',
+      }),
       dayOfWeek: dayOfWeek
     }
   }
