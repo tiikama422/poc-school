@@ -79,7 +79,11 @@ async function getPeriodStats(userId, startDate, endDate) {
 // 週間データを取得（グラフ用）
 async function getWeeklyData(userId, weekStart) {
   const weeklyData = []
-  const today = getLocalDateString(new Date())
+  // JST時間で今日の日付を取得
+  const jstOffset = 9 * 60 // JST is UTC+9
+  const now = new Date()
+  const jstTime = new Date(now.getTime() + jstOffset * 60 * 1000)
+  const today = getLocalDateString(new Date(jstTime.getFullYear(), jstTime.getMonth(), jstTime.getDate()))
   
   for (let i = 0; i < 7; i++) {
     const currentDate = new Date(weekStart)
@@ -156,8 +160,12 @@ async function getStudyStreak(userId) {
     return 0
   }
 
-  const today = getLocalDateString(new Date())
-  const yesterday = new Date()
+  // JST時間で今日と昨日の日付を取得
+  const jstOffset = 9 * 60 // JST is UTC+9
+  const now = new Date()
+  const jstTime = new Date(now.getTime() + jstOffset * 60 * 1000)
+  const today = getLocalDateString(new Date(jstTime.getFullYear(), jstTime.getMonth(), jstTime.getDate()))
+  const yesterday = new Date(jstTime.getFullYear(), jstTime.getMonth(), jstTime.getDate())
   yesterday.setDate(yesterday.getDate() - 1)
   const yesterdayStr = getLocalDateString(yesterday)
 
@@ -248,8 +256,11 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // 日付計算
-    const today = new Date()
+    // 日付計算（JST時間で統一）
+    const jstOffset = 9 * 60 // JST is UTC+9
+    const now = new Date()
+    const jstTime = new Date(now.getTime() + jstOffset * 60 * 1000)
+    const today = new Date(jstTime.getFullYear(), jstTime.getMonth(), jstTime.getDate())
     const todayStr = getLocalDateString(today)
     
     const weekStart = getWeekStart(today)
