@@ -168,7 +168,7 @@ export default function DailyStudyDetail() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 sm:mb-6 gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-white tracking-wide">
-              {dateInfo.formatted}の記録
+              {dateInfo.formatted}({dateInfo.dayOfWeek})の記録
             </h1>
             <div className="mt-2 flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 text-slate-300 text-sm">
               <span>合計: <span className="text-blue-400 font-medium">{formatTime(totalMinutes)}</span></span>
