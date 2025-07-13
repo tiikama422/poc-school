@@ -474,34 +474,6 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            {/* Learning Motivation */}
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <span className="mr-2 text-lg">🏆</span>
-                学習の記録
-              </h2>
-              <div className="space-y-3">
-                <div className="text-center p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-500/20">
-                  <div className="text-lg mb-1">🔥</div>
-                  <div className="text-base font-bold text-white">{stats?.streakDays || 0}日連続</div>
-                  <div className="text-xs text-slate-300">学習記録継続中！</div>
-                </div>
-                
-                {stats?.achievements && stats.achievements.length > 0 && (
-                  <div>
-                    <div className="text-sm font-medium text-slate-300 mb-2">最近の達成</div>
-                    <div className="space-y-2">
-                      {stats.achievements.slice(0, 3).map((achievement, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <span className="text-yellow-400">🏅</span>
-                          <span className="text-slate-300">{achievement.title}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
