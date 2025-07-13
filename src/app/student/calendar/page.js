@@ -340,9 +340,9 @@ export default function StudyCalendar() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6">
           {/* Calendar */}
-          <div className="lg:col-span-3">
+          <div className="xl:col-span-3">
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4">
               {/* Calendar Header */}
               <div className="flex justify-between items-center mb-3 sm:mb-4">
@@ -387,21 +387,21 @@ export default function StudyCalendar() {
                     key={index}
                     onClick={() => handleDateClick(day)}
                     className={`
-                      relative min-h-[40px] sm:min-h-[60px] p-1 sm:p-2 rounded-lg cursor-pointer transition-all duration-200
+                      relative min-h-[60px] lg:min-h-[80px] xl:min-h-[100px] p-1 sm:p-2 rounded-lg cursor-pointer transition-all duration-200
                       ${day.isCurrentMonth 
                         ? 'hover:bg-slate-700/30' 
                         : 'text-slate-600'
                       }
                       ${isToday(day.date) 
-                        ? 'bg-blue-500/20 border border-blue-500/40' 
+                        ? 'bg-blue-500/20 border-2 border-blue-500/60' 
                         : 'hover:bg-black/20'
                       }
                     `}
                   >
                     <div className="flex justify-between items-start">
-                      <div className={`text-sm font-medium ${
+                      <div className={`text-sm lg:text-base font-medium ${
                         day.isCurrentMonth ? 'text-white' : 'text-slate-600'
-                      }`}>
+                      } ${isToday(day.date) ? 'text-blue-100 font-bold' : ''}`}>
                         {day.date.getDate()}
                       </div>
                       
@@ -409,7 +409,7 @@ export default function StudyCalendar() {
                       <div className="flex gap-1">
                         {/* Event indicator */}
                         {day.events.length > 0 && (
-                          <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                         )}
                         {/* Memo indicator */}
                         {(() => {
@@ -419,26 +419,26 @@ export default function StudyCalendar() {
                           const dateString = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
                           return memos[dateString]
                         })() && (
-                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                         )}
                       </div>
                     </div>
                     
                     {/* Events */}
-                    <div className="mt-1 space-y-1">
-                      {day.events.slice(0, 1).map((event, eventIndex) => (
+                    <div className="mt-2 space-y-1">
+                      {day.events.slice(0, window.innerWidth >= 1024 ? 3 : 2).map((event, eventIndex) => (
                         <div
                           key={eventIndex}
-                          className="text-xs px-1 py-0.5 rounded text-white truncate"
+                          className="text-xs lg:text-sm px-1.5 py-0.5 rounded text-white truncate leading-tight"
                           style={{ backgroundColor: event.color }}
-                          title={event.title}
+                          title={`${event.title} - ${event.description || ''}`}
                         >
                           {event.title}
                         </div>
                       ))}
-                      {day.events.length > 1 && (
-                        <div className="text-xs text-slate-400">
-                          +{day.events.length - 1}件
+                      {day.events.length > (window.innerWidth >= 1024 ? 3 : 2) && (
+                        <div className="text-xs text-slate-400 font-medium">
+                          +{day.events.length - (window.innerWidth >= 1024 ? 3 : 2)}件
                         </div>
                       )}
                     </div>
@@ -557,13 +557,81 @@ export default function StudyCalendar() {
               </div>
             </div>
 
-            {/* Today's Memo */}
+            {/* Today's Events and Memo */}
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 sm:p-4">
               <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                <span className="mr-2 text-lg">📝</span>
-                今日のメモ
+                <span className="mr-2 text-lg">📅</span>
+                今日の予定とメモ
               </h3>
               
+              {/* Today's Events */}
+              {(() => {
+                const today = new Date()
+                const year = today.getFullYear()
+                const month = today.getMonth() + 1
+                const day = today.getDate()
+                const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                const todayEvents = events.filter(event => event.date === dateString)
+                
+                return todayEvents.length > 0 ? (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-slate-300 mb-2">今日の予定</h4>
+                    <div className="space-y-2">
+                      {todayEvents.map((event) => (
+                        <div key={event.id} className="p-3 bg-black/30 rounded-lg border-l-4" style={{ borderLeftColor: event.color }}>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="text-white font-medium text-sm">{event.title}</div>
+                              {event.description && (
+                                <div className="text-slate-400 text-xs mt-1">{event.description}</div>
+                              )}
+                              <div className="flex items-center gap-2 mt-2">
+                                <div 
+                                  className="px-2 py-1 rounded text-xs text-white font-medium"
+                                  style={{ backgroundColor: event.color }}
+                                >
+                                  {event.type}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1 ml-2">
+                              <button
+                                onClick={() => handleEditEvent(event)}
+                                className="p-1 text-slate-400 hover:text-blue-400 rounded transition-colors"
+                                title="編集"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4 p-3 bg-black/20 rounded-lg text-center">
+                    <div className="text-slate-400 text-sm">今日の予定はありません</div>
+                    <button
+                      onClick={() => {
+                        const today = new Date()
+                        const year = today.getFullYear()
+                        const month = today.getMonth() + 1
+                        const day = today.getDate()
+                        const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                        setEventModalDate(new Date(dateString))
+                        setShowEventModal(true)
+                      }}
+                      className="mt-2 text-blue-400 hover:text-blue-300 text-sm"
+                    >
+                      今日の予定を追加
+                    </button>
+                  </div>
+                )
+              })()}
+              
+              {/* Today's Memo */}
               {(() => {
                 const today = new Date()
                 const year = today.getFullYear()
@@ -571,25 +639,42 @@ export default function StudyCalendar() {
                 const day = today.getDate()
                 const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
                 const todayMemo = memos[dateString]
-                return todayMemo ? (
-                  <div className="p-3 bg-black/20 rounded-lg">
-                    <div className="text-white text-sm">{todayMemo}</div>
-                  </div>
-                ) : (
-                  <div className="text-center py-4 text-slate-400">
-                    <div className="text-sm">今日のメモはまだありません</div>
-                    <button
-                      onClick={() => {
-                        const today = new Date()
-                        setModalDate(today)
-                        setCurrentMemo('')
-                        setIsEditing(false)
-                        setShowModal(true)
-                      }}
-                      className="mt-2 text-blue-400 hover:text-blue-300 text-sm"
-                    >
-                      メモを追加する
-                    </button>
+                return (
+                  <div>
+                    <h4 className="text-sm font-medium text-slate-300 mb-2">今日のメモ</h4>
+                    {todayMemo ? (
+                      <div className="p-3 bg-black/20 rounded-lg">
+                        <div className="text-white text-sm">{todayMemo}</div>
+                        <button
+                          onClick={() => {
+                            const today = new Date()
+                            setModalDate(today)
+                            setCurrentMemo(todayMemo)
+                            setIsEditing(true)
+                            setShowModal(true)
+                          }}
+                          className="mt-2 text-blue-400 hover:text-blue-300 text-xs"
+                        >
+                          編集する
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-black/20 rounded-lg text-center">
+                        <div className="text-slate-400 text-sm">今日のメモはまだありません</div>
+                        <button
+                          onClick={() => {
+                            const today = new Date()
+                            setModalDate(today)
+                            setCurrentMemo('')
+                            setIsEditing(false)
+                            setShowModal(true)
+                          }}
+                          className="mt-2 text-blue-400 hover:text-blue-300 text-sm"
+                        >
+                          メモを追加する
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )
               })()} 
